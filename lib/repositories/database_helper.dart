@@ -21,8 +21,8 @@ class DatabaseHelper {
     return await openDatabase(
       path,
       version: 1,
-      onCreate: (db, version) {
-        db.execute('''
+      onCreate: (db, version) async {
+        await db.execute('''
           CREATE TABLE Foods (
             FoodId TEXT PRIMARY KEY,
             Name TEXT NOT NULL,
@@ -31,6 +31,28 @@ class DatabaseHelper {
             Carbohydrates REAL NOT NULL,
             Fats REAL NOT NULL,
             Proteins REAL NOT NULL
+          );
+        ''');
+
+        await db.execute('''
+          CREATE TABLE Meals (
+            MealId TEXT PRIMARY KEY,
+            Name TEXT
+          );
+        ''');
+
+        await db.execute('''
+          CREATE TABLE MealFood (
+            MealId TEXT,
+            FoodId TEXT,
+            Weight REAL NOT NULL,
+            ScaledCalories REAL NULL,
+            ScaledFats REAL NULL,
+            ScaledCarbohydrates REAL NULL,
+            ScaledProteins REAL NULL,
+            PRIMARY KEY (MealId, FoodId),
+            FOREIGN KEY (MealId) REFERENCES Meals(MealId) ON DELETE CASCADE,
+            FOREIGN KEY (FoodId) REFERENCES Foods(FoodId) ON DELETE CASCADE
           );
         ''');
       },

@@ -1,28 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mealsmanagement/bloc/food/food_bloc.dart';
-import 'package:mealsmanagement/models/food.dart';
-import '../widgets/foods_form_dialog.dart';
+import 'package:mealsmanagement/CustomIcons.dart';
+import 'package:mealsmanagement/bloc/meal/meal_bloc.dart';
 
-class FoodsPage extends StatelessWidget {
-  const FoodsPage({super.key});
+import '../models/meal.dart';
+import 'meal_detail_page.dart';
+
+class MealsPage extends StatelessWidget {
+  const MealsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
-      body: BlocBuilder<FoodBloc, FoodState>(
-        builder: (BuildContext ctx, FoodState state) {
-          if (state is FoodsLoaded) {
+      body: BlocBuilder<MealBloc, MealState>(
+        builder: (BuildContext ctx, MealState state) {
+          if (state is MealsLoaded) {
             return Column(children: [
               Expanded(
                 child: ListView.builder(
                   shrinkWrap: true,
-                  itemCount: state.foods.length,
+                  itemCount: state.meals.length,
                   itemBuilder: (context, index) {
-                    final food = state.foods[index];
+                    final meal = state.meals[index];
                     return Dismissible(
-                      key: Key(food.foodId),
+                      key: Key(meal.mealId),
                       direction: DismissDirection.endToStart,
                       background: Container(
                         alignment: Alignment.center,
@@ -45,18 +47,18 @@ class FoodsPage extends StatelessWidget {
                         ),
                       ),
                       onDismissed: (direction) {
-                        BlocProvider.of<FoodBloc>(context)
-                            .add(DeleteFood(food.foodId));
+                        /*BlocProvider.of<FoodBloc>(context)
+                            .add(DeleteFood(meal.foodId));*/
                         ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Food removed')));
                       },
-                      child: _cardItem(context, food),
+                      child: _cardItem(context, meal),
                     );
                   },
                 ),
               ),
             ]);
-          } else if (state is FoodsError) {
+          } else if (state is MealsError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.errorMessage),
@@ -70,14 +72,9 @@ class FoodsPage extends StatelessWidget {
         backgroundColor: Colors.cyan,
         foregroundColor: Colors.white,
         onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) => FoodFormDialog(
-              food: null,
-              onSave: (food) {
-                BlocProvider.of<FoodBloc>(context).add(AddFood(food));
-              },
-            ),
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const MealDetailPage()),
           );
         },
         child: const Icon(Icons.add),
@@ -85,18 +82,18 @@ class FoodsPage extends StatelessWidget {
     );
   }
 
-  Widget _cardItem(BuildContext context, Food food) {
+  Widget _cardItem(BuildContext context, Meal meal) {
     return Card(
       elevation: 8.0,
       margin: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
       child: Container(
         decoration: const BoxDecoration(color: Color.fromRGBO(64, 75, 96, .9)),
-        child: _makeListTile(context, food),
+        child: _makeListTile(context, meal),
       ),
     );
   }
 
-  Widget _makeListTile(BuildContext context, Food food) {
+  Widget _makeListTile(BuildContext context, Meal meal) {
     return ListTile(
       contentPadding:
           const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
@@ -108,65 +105,25 @@ class FoodsPage extends StatelessWidget {
           ),
         ),
         child: const Icon(
-          Icons.fastfood,
+          CustomIcons.food,
           color: Colors.white,
           size: 40,
         ),
       ),
       title: Text(
-        food.name,
+        meal.name,
         style:
             const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-      ),
-      subtitle: Wrap(
-        spacing: 3.0, // Space between chips
-        runSpacing: 0.1, // Space between rows
-        children: <Widget>[
-          Chip(
-            label: Text(
-              "Protein: ${food.proteins.toString()}",
-              style: const TextStyle(color: Colors.white),
-            ),
-            padding: const EdgeInsets.all(0),
-            backgroundColor: Colors.cyan,
-          ),
-          Chip(
-            label: Text(
-              "kCal: ${food.calories.toString()}",
-              style: const TextStyle(color: Colors.white),
-            ),
-            padding: const EdgeInsets.all(0),
-            backgroundColor: Colors.cyan,
-          ),
-          Chip(
-            label: Text(
-              "Carbs: ${food.carbohydrates.toString()}",
-              style: const TextStyle(color: Colors.white),
-            ),
-            padding: const EdgeInsets.all(0),
-            backgroundColor: Colors.cyan,
-          ),
-          Chip(
-            label: Text(
-              "Fats: ${food.fats.toString()}",
-              style: const TextStyle(color: Colors.white),
-            ),
-            padding: const EdgeInsets.all(0),
-            backgroundColor: Colors.cyan,
-          ),
-        ],
       ),
       trailing: const Icon(Icons.keyboard_arrow_right,
           color: Colors.white, size: 30.0),
       onTap: () {
-        showDialog(
-          context: context,
-          builder: (context) => FoodFormDialog(
-            food: food,
-            onSave: (food) {
-              BlocProvider.of<FoodBloc>(context)
-                  .add(UpdateFood(food.foodId, food));
-            },
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MealDetailPage(
+              mealId: meal.mealId,
+            ),
           ),
         );
       },

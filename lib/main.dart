@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mealsmanagement/bloc/food/food_bloc.dart';
+import 'package:mealsmanagement/bloc/meal/meal_bloc.dart';
 import 'package:mealsmanagement/repositories/food_repository.dart';
+import 'package:mealsmanagement/repositories/meal_repository.dart';
 import 'package:mealsmanagement/screens/home_page.dart';
 import 'package:mealsmanagement/CustomIcons.dart';
+import 'package:mealsmanagement/screens/meals_page.dart';
 
 import 'screens/foods_page.dart';
 
@@ -21,13 +24,20 @@ class MyApp extends StatelessWidget {
         RepositoryProvider(
           create: (context) => FoodRepository(),
         ),
+        RepositoryProvider(
+          create: (context) => MealRepository(),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
               create: (context) =>
                   FoodBloc(RepositoryProvider.of<FoodRepository>(context))
-                    ..loadFoods())
+                    ..loadFoods()),
+          BlocProvider(
+              create: (context) =>
+                  MealBloc(RepositoryProvider.of<MealRepository>(context))
+                    ..loadMeals())
         ],
         child: MaterialApp(
           title: 'Flutter Demo',
@@ -37,13 +47,19 @@ class MyApp extends StatelessWidget {
             //useMaterial3: true,
           ),
           home: DefaultTabController(
-              length: 2,
+              length: 3,
               child: Scaffold(
                 backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
                 appBar: AppBar(
                   centerTitle: true,
                   backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
-                  title: const Text("Meals Management", style: TextStyle(color: Colors.white, fontStyle: FontStyle.italic, fontWeight: FontWeight.w700),),
+                  title: const Text(
+                    "Meals Management",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.w700),
+                  ),
                 ),
                 bottomNavigationBar: const TabBar(
                   automaticIndicatorColorAdjustment: true,
@@ -60,6 +76,10 @@ class MyApp extends StatelessWidget {
                       ),
                       text: 'Foods',
                     ),
+                    Tab(
+                      icon: Icon(CustomIcons.food),
+                      text: 'Meals',
+                    ),
                   ],
                   labelColor: Colors.white,
                   unselectedLabelColor: Colors.white,
@@ -67,6 +87,9 @@ class MyApp extends StatelessWidget {
                 body: TabBarView(children: [
                   HomePage(key: key),
                   FoodsPage(
+                    key: key,
+                  ),
+                  MealsPage(
                     key: key,
                   )
                 ]),

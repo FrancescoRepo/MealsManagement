@@ -75,12 +75,9 @@ class _FoodFormDialogState extends State<FoodFormDialog> {
                   );
                 }).toList(),
                 onChanged: (String? newValue) {
-                  print(newValue);
                   setState(() {
                     _selectedValueFor = newValue; // Update the selected value
                   });
-
-                  print(_selectedValueFor);
                 },
                 validator: (value) {
                   if (value == null) {

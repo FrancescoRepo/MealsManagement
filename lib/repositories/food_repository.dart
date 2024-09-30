@@ -13,12 +13,6 @@ class FoodRepository implements IFoodRepository {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
 
   @override
-  Future<void> addFood(Food food) async {
-    final db = await _databaseHelper.database;
-    await db.insert('Foods', food.toMap());
-  }
-
-  @override
   Future<List<Food>> getFoods() async {
     final db = await _databaseHelper.database;
     final List<Map<String, dynamic>> maps = await db.query('Foods');
@@ -26,6 +20,12 @@ class FoodRepository implements IFoodRepository {
     return List.generate(maps.length, (i) {
       return Food.fromMap(maps[i]);
     });
+  }
+
+  @override
+  Future<void> addFood(Food food) async {
+    final db = await _databaseHelper.database;
+    await db.insert('Foods', food.toMap());
   }
 
   @override
