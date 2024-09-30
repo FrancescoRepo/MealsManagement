@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mealsmanagement/bloc/meals/meals_bloc.dart';
-import 'package:mealsmanagement/repositories/meals_repository.dart';
+import 'package:mealsmanagement/bloc/food/food_bloc.dart';
+import 'package:mealsmanagement/repositories/food_repository.dart';
 import 'package:mealsmanagement/screens/home_page.dart';
+import 'package:mealsmanagement/CustomIcons.dart';
 
-import 'screens/meals_page.dart';
+import 'screens/foods_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,15 +19,15 @@ class MyApp extends StatelessWidget {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider(
-          create: (context) => MealRepository(),
+          create: (context) => FoodRepository(),
         ),
       ],
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
               create: (context) =>
-                  MealsBloc(RepositoryProvider.of<MealRepository>(context))
-                    ..loadMeals())
+                  FoodBloc(RepositoryProvider.of<FoodRepository>(context))
+                    ..loadFoods())
         ],
         child: MaterialApp(
           title: 'Flutter Demo',
@@ -57,7 +58,7 @@ class MyApp extends StatelessWidget {
                       icon: Icon(
                         Icons.fastfood,
                       ),
-                      text: 'Meals',
+                      text: 'Foods',
                     ),
                   ],
                   labelColor: Colors.white,
@@ -65,7 +66,7 @@ class MyApp extends StatelessWidget {
                 ),
                 body: TabBarView(children: [
                   HomePage(key: key),
-                  MealsPage(
+                  FoodsPage(
                     key: key,
                   )
                 ]),

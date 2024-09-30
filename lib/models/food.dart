@@ -2,8 +2,8 @@ import 'dart:ffi';
 
 import 'package:flutter_guid/flutter_guid.dart';
 
-class Meal {
-  final String mealId;
+class Food {
+  final String foodId;
   final String name;
   final String valueFor;
   final num calories;
@@ -11,11 +11,11 @@ class Meal {
   final num fats;
   final num proteins;
 
-  Meal(this.mealId, this.name, this.valueFor, this.calories, this.carbohydrates, this.fats, this.proteins);
+  Food(this.foodId, this.name, this.valueFor, this.calories, this.carbohydrates, this.fats, this.proteins);
 
-  factory Meal.fromMap(Map<String, dynamic> map) {
-    return Meal(
-      map['MealId'],
+  factory Food.fromMap(Map<String, dynamic> map) {
+    return Food(
+      map['FoodId'],
       map['Name'],
       map['ValueFor'],
       map['Calories'],
@@ -27,7 +27,7 @@ class Meal {
 
   Map<String, dynamic> toMap() {
     return {
-      'MealId': mealId,
+      'FoodId': foodId,
       'Name': name,
       'ValueFor': valueFor,
       'Calories': calories,

@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mealsmanagement/bloc/meals/meals_bloc.dart';
-import 'package:mealsmanagement/models/meal.dart';
-import '../widgets/meals_form_dialog.dart';
+import 'package:mealsmanagement/bloc/food/food_bloc.dart';
+import 'package:mealsmanagement/models/food.dart';
+import '../widgets/foods_form_dialog.dart';
 
-class MealsPage extends StatelessWidget {
-  const MealsPage({super.key});
+class FoodsPage extends StatelessWidget {
+  const FoodsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
-      body: BlocBuilder<MealsBloc, MealsState>(
-        builder: (BuildContext ctx, MealsState state) {
-          if (state is MealsLoaded) {
+      body: BlocBuilder<FoodBloc, FoodState>(
+        builder: (BuildContext ctx, FoodState state) {
+          if (state is FoodsLoaded) {
             return Column(children: [
               Expanded(
                 child: ListView.builder(
                   shrinkWrap: true,
-                  itemCount: state.meals.length,
+                  itemCount: state.foods.length,
                   itemBuilder: (context, index) {
-                    final meal = state.meals[index];
+                    final food = state.foods[index];
                     return Dismissible(
-                      key: Key(meal.mealId),
+                      key: Key(food.foodId),
                       direction: DismissDirection.endToStart,
                       background: Container(
                         alignment: Alignment.center,
@@ -45,18 +45,18 @@ class MealsPage extends StatelessWidget {
                         ),
                       ),
                       onDismissed: (direction) {
-                        BlocProvider.of<MealsBloc>(context)
-                            .add(DeleteMeal(meal.mealId));
+                        BlocProvider.of<FoodBloc>(context)
+                            .add(DeleteFood(food.foodId));
                         ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Meal removed')));
+                            const SnackBar(content: Text('Food removed')));
                       },
-                      child: _cardItem(context, meal),
+                      child: _cardItem(context, food),
                     );
                   },
                 ),
               ),
             ]);
-          } else if (state is MealError) {
+          } else if (state is FoodsError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.errorMessage),
@@ -69,14 +69,12 @@ class MealsPage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.white,
         onPressed: () {
-          // Show the Meal Form Dialog
           showDialog(
             context: context,
-            builder: (context) => MealFormDialog(
-              meal: null,
-              onSave: (meal) {
-                // Dispatch the AddItem event to the BLoC when a new meal is created
-                BlocProvider.of<MealsBloc>(context).add(AddMeal(meal));
+            builder: (context) => FoodFormDialog(
+              food: null,
+              onSave: (food) {
+                BlocProvider.of<FoodBloc>(context).add(AddFood(food));
               },
             ),
           );
@@ -86,18 +84,18 @@ class MealsPage extends StatelessWidget {
     );
   }
 
-  Widget _cardItem(BuildContext context, Meal meal) {
+  Widget _cardItem(BuildContext context, Food food) {
     return Card(
       elevation: 8.0,
       margin: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
       child: Container(
         decoration: const BoxDecoration(color: Color.fromRGBO(64, 75, 96, .9)),
-        child: _makeListTile(context, meal),
+        child: _makeListTile(context, food),
       ),
     );
   }
 
-  Widget _makeListTile(BuildContext context, Meal meal) {
+  Widget _makeListTile(BuildContext context, Food food) {
     return ListTile(
       contentPadding:
           const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
@@ -115,7 +113,7 @@ class MealsPage extends StatelessWidget {
         ),
       ),
       title: Text(
-        meal.name,
+        food.name,
         style:
             const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
@@ -124,19 +122,19 @@ class MealsPage extends StatelessWidget {
         runSpacing: 0.1, // Space between rows
         children: <Widget>[
           Chip(
-            label: Text("Protein: ${meal.proteins.toString()}"),
+            label: Text("Protein: ${food.proteins.toString()}"),
             padding: const EdgeInsets.all(0),
           ),
           Chip(
-            label: Text("kCal: ${meal.calories.toString()}"),
+            label: Text("kCal: ${food.calories.toString()}"),
             padding: const EdgeInsets.all(0),
           ),
           Chip(
-            label: Text("Carbs: ${meal.carbohydrates.toString()}"),
+            label: Text("Carbs: ${food.carbohydrates.toString()}"),
             padding: const EdgeInsets.all(0),
           ),
           Chip(
-            label: Text("Fats: ${meal.fats.toString()}"),
+            label: Text("Fats: ${food.fats.toString()}"),
             padding: const EdgeInsets.all(0),
           ),
         ],
@@ -146,12 +144,11 @@ class MealsPage extends StatelessWidget {
       onTap: () {
         showDialog(
           context: context,
-          builder: (context) => MealFormDialog(
-            meal: meal,
-            onSave: (meal) {
-              // Dispatch the AddItem event to the BLoC when a new meal is created
-              BlocProvider.of<MealsBloc>(context)
-                  .add(UpdateMeal(meal.mealId, meal));
+          builder: (context) => FoodFormDialog(
+            food: food,
+            onSave: (food) {
+              BlocProvider.of<FoodBloc>(context)
+                  .add(UpdateFood(food.foodId, food));
             },
           ),
         );

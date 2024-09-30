@@ -1,40 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_guid/flutter_guid.dart';
-import '../models/meal.dart';
+import '../models/food.dart';
 
-class MealFormDialog extends StatefulWidget {
-  final Function(Meal) onSave; // Callback to send data back
-  final Meal? meal;
+class FoodFormDialog extends StatefulWidget {
+  final Function(Food) onSave; // Callback to send data back
+  final Food? food;
 
-  const MealFormDialog({super.key, required this.onSave, this.meal});
+  const FoodFormDialog({super.key, required this.onSave, this.food});
 
   @override
-  _MealFormDialogState createState() => _MealFormDialogState();
+  _FoodFormDialogState createState() => _FoodFormDialogState();
 }
 
-class _MealFormDialogState extends State<MealFormDialog> {
+class _FoodFormDialogState extends State<FoodFormDialog> {
   final _formKey = GlobalKey<FormState>();
-  final _mealIdController = TextEditingController();
   final _nameController = TextEditingController();
   final _caloriesController = TextEditingController();
   final _carbohydratesController = TextEditingController();
   final _fatsController = TextEditingController();
   final _proteinsController = TextEditingController();
-  String? _selectedValue;
+  String? _selectedValueFor;
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      final meal = Meal(
-        widget.meal != null ? widget.meal!.mealId : Guid.newGuid.toString(),
+      final food = Food(
+        widget.food != null ? widget.food!.foodId : Guid.newGuid.toString(),
         _nameController.text,
-        _selectedValue!,
+        _selectedValueFor!,
         num.parse(_caloriesController.text),
         num.parse(_carbohydratesController.text),
         num.parse(_fatsController.text),
         num.parse(_proteinsController.text),
       );
 
-      widget.onSave(meal); // Call the callback to pass data back
+      widget.onSave(food); // Call the callback to pass data back
       Navigator.of(context).pop(); // Close the dialog
     }
   }
@@ -42,20 +41,20 @@ class _MealFormDialogState extends State<MealFormDialog> {
   @override
   void initState() {
     super.initState();
-    if (widget.meal != null) {
-      _nameController.text = widget.meal!.name;
-      _selectedValue = widget.meal!.valueFor;
-      _caloriesController.text = widget.meal!.calories.toString();
-      _carbohydratesController.text = widget.meal!.carbohydrates.toString();
-      _fatsController.text = widget.meal!.fats.toString();
-      _proteinsController.text = widget.meal!.proteins.toString();
+    if (widget.food != null) {
+      _nameController.text = widget.food!.name;
+      _selectedValueFor = widget.food!.valueFor;
+      _caloriesController.text = widget.food!.calories.toString();
+      _carbohydratesController.text = widget.food!.carbohydrates.toString();
+      _fatsController.text = widget.food!.fats.toString();
+      _proteinsController.text = widget.food!.proteins.toString();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.meal == null ? 'Create a new meal' : 'Edit meal'),
+      title: Text(widget.food == null ? 'Create a new food' : 'Edit food'),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -67,7 +66,7 @@ class _MealFormDialogState extends State<MealFormDialog> {
                   labelText: 'Value for', // Label for the dropdown
                   border: OutlineInputBorder(),
                 ),
-                value: _selectedValue,
+                value: _selectedValueFor,
                 // Current selected value
                 items: <String>['100g', '100ml'].map((String value) {
                   return DropdownMenuItem<String>(
@@ -78,10 +77,10 @@ class _MealFormDialogState extends State<MealFormDialog> {
                 onChanged: (String? newValue) {
                   print(newValue);
                   setState(() {
-                    _selectedValue = newValue; // Update the selected value
+                    _selectedValueFor = newValue; // Update the selected value
                   });
 
-                  print(_selectedValue);
+                  print(_selectedValueFor);
                 },
                 validator: (value) {
                   if (value == null) {

@@ -23,8 +23,8 @@ class DatabaseHelper {
       version: 1,
       onCreate: (db, version) {
         db.execute('''
-          CREATE TABLE Meals (
-            MealId TEXT PRIMARY KEY,
+          CREATE TABLE Foods (
+            FoodId TEXT PRIMARY KEY,
             Name TEXT NOT NULL,
             ValueFor TEXT NOT NULL,
             Calories REAL NOT NULL,
