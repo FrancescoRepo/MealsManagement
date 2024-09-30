@@ -26,7 +26,7 @@ class DatabaseHelper {
           CREATE TABLE Meals (
             MealId TEXT PRIMARY KEY,
             Name TEXT NOT NULL,
-            Weight REAL NOT NULL,
+            ValueFor TEXT NOT NULL,
             Calories REAL NOT NULL,
             Carbohydrates REAL NOT NULL,
             Fats REAL NOT NULL,

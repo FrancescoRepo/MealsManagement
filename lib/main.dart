@@ -41,9 +41,13 @@ class MyApp extends StatelessWidget {
                 backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
                 appBar: AppBar(
                   centerTitle: true,
-                  title: const Text("Meals Management"),
+                  backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
+                  title: const Text("Meals Management", style: TextStyle(color: Colors.white, fontStyle: FontStyle.italic, fontWeight: FontWeight.w700),),
                 ),
                 bottomNavigationBar: const TabBar(
+                  automaticIndicatorColorAdjustment: true,
+                  indicatorColor: Colors.white,
+                  dividerColor: Color.fromRGBO(58, 66, 86, 1.0),
                   tabs: [
                     Tab(
                       icon: Icon(Icons.home),

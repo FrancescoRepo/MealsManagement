@@ -18,4 +18,20 @@ class AddMeal extends MealsEvent {
   List<Object> get props => [meal];
 }
 
+class UpdateMeal extends MealsEvent {
+  final String mealId;
+  final Meal meal;
+  const UpdateMeal(this.mealId, this.meal);
+
+  @override
+  List<Object> get props => [meal];
+}
+
+class DeleteMeal extends MealsEvent {
+  final String mealId;
+  const DeleteMeal(this.mealId);
+
+  @override
+  List<Object> get props => [mealId];
+}
 

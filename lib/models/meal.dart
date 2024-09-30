@@ -5,19 +5,19 @@ import 'package:flutter_guid/flutter_guid.dart';
 class Meal {
   final String mealId;
   final String name;
-  final num weight;
+  final String valueFor;
   final num calories;
   final num carbohydrates;
   final num fats;
   final num proteins;
 
-  Meal(this.mealId, this.name, this.weight, this.calories, this.carbohydrates, this.fats, this.proteins);
+  Meal(this.mealId, this.name, this.valueFor, this.calories, this.carbohydrates, this.fats, this.proteins);
 
   factory Meal.fromMap(Map<String, dynamic> map) {
     return Meal(
       map['MealId'],
       map['Name'],
-      map['Weight'],
+      map['ValueFor'],
       map['Calories'],
       map['Carbohydrates'],
       map['Fats'],
@@ -25,11 +25,11 @@ class Meal {
     );
   }
 
-  Map<String, dynamic> toMap(String mealId) {
+  Map<String, dynamic> toMap() {
     return {
       'MealId': mealId,
       'Name': name,
-      'Weight': weight,
+      'ValueFor': valueFor,
       'Calories': calories,
       'Carbohydrates': carbohydrates,
       'Fats': fats,

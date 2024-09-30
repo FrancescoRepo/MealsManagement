@@ -17,3 +17,12 @@ class MealsLoaded extends MealsState {
   @override
   List<Object> get props => [];
 }
+
+class MealError extends MealsState {
+  final String errorMessage;
+  const MealError({required this.errorMessage});
+
+  @override
+  List<Object> get props => [];
+}
+

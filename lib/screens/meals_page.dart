@@ -21,11 +21,47 @@ class MealsPage extends StatelessWidget {
                   itemCount: state.meals.length,
                   itemBuilder: (context, index) {
                     final meal = state.meals[index];
-                    return _cardItem(context, meal);
+                    return Dismissible(
+                      key: Key(meal.mealId),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        alignment: Alignment.center,
+                        color: Colors.redAccent,
+                        child: const Row(
+                          // Wrap with a row here
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                            ),
+                            Text(
+                              'Delete',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      onDismissed: (direction) {
+                        BlocProvider.of<MealsBloc>(context)
+                            .add(DeleteMeal(meal.mealId));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Meal removed')));
+                      },
+                      child: _cardItem(context, meal),
+                    );
                   },
                 ),
               ),
             ]);
+          } else if (state is MealError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.errorMessage),
+              ),
+            );
           }
           return const Center(child: CircularProgressIndicator());
         },
@@ -37,7 +73,8 @@ class MealsPage extends StatelessWidget {
           showDialog(
             context: context,
             builder: (context) => MealFormDialog(
-              onMealCreated: (meal) {
+              meal: null,
+              onSave: (meal) {
                 // Dispatch the AddItem event to the BLoC when a new meal is created
                 BlocProvider.of<MealsBloc>(context).add(AddMeal(meal));
               },
@@ -106,6 +143,19 @@ class MealsPage extends StatelessWidget {
       ),
       trailing: const Icon(Icons.keyboard_arrow_right,
           color: Colors.white, size: 30.0),
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (context) => MealFormDialog(
+            meal: meal,
+            onSave: (meal) {
+              // Dispatch the AddItem event to the BLoC when a new meal is created
+              BlocProvider.of<MealsBloc>(context)
+                  .add(UpdateMeal(meal.mealId, meal));
+            },
+          ),
+        );
+      },
     );
   }
 }

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_guid/flutter_guid.dart';
 import '../models/meal.dart';
 
 class MealFormDialog extends StatefulWidget {
-  final Function(Meal) onMealCreated; // Callback to send data back
+  final Function(Meal) onSave; // Callback to send data back
+  final Meal? meal;
 
-  const MealFormDialog({super.key, required this.onMealCreated});
+  const MealFormDialog({super.key, required this.onSave, this.meal});
 
   @override
   _MealFormDialogState createState() => _MealFormDialogState();
@@ -22,44 +24,51 @@ class _MealFormDialogState extends State<MealFormDialog> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      // Create a Meal object from the input
       final meal = Meal(
-        _mealIdController.text,
+        widget.meal != null ? widget.meal!.mealId : Guid.newGuid.toString(),
         _nameController.text,
-        num.parse(_selectedValue!.replaceAll("g", "").replaceAll("ml", "")),
+        _selectedValue!,
         num.parse(_caloriesController.text),
         num.parse(_carbohydratesController.text),
         num.parse(_fatsController.text),
         num.parse(_proteinsController.text),
       );
 
-      widget.onMealCreated(meal); // Call the callback to pass data back
+      widget.onSave(meal); // Call the callback to pass data back
       Navigator.of(context).pop(); // Close the dialog
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.meal != null) {
+      _nameController.text = widget.meal!.name;
+      _selectedValue = widget.meal!.valueFor;
+      _caloriesController.text = widget.meal!.calories.toString();
+      _carbohydratesController.text = widget.meal!.carbohydrates.toString();
+      _fatsController.text = widget.meal!.fats.toString();
+      _proteinsController.text = widget.meal!.proteins.toString();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Create a New Meal'),
+      title: Text(widget.meal == null ? 'Create a new meal' : 'Edit meal'),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Name'),
-                validator: (value) => value!.isEmpty ? 'Please enter a name' : null,
-              ),
-              const SizedBox(height: 20),
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(
                   labelText: 'Value for', // Label for the dropdown
                   border: OutlineInputBorder(),
                 ),
-                value: _selectedValue, // Current selected value
+                value: _selectedValue,
+                // Current selected value
                 items: <String>['100g', '100ml'].map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -67,9 +76,12 @@ class _MealFormDialogState extends State<MealFormDialog> {
                   );
                 }).toList(),
                 onChanged: (String? newValue) {
+                  print(newValue);
                   setState(() {
                     _selectedValue = newValue; // Update the selected value
                   });
+
+                  print(_selectedValue);
                 },
                 validator: (value) {
                   if (value == null) {
@@ -78,29 +90,41 @@ class _MealFormDialogState extends State<MealFormDialog> {
                   return null;
                 },
               ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Name'),
+                validator: (value) =>
+                value!.isEmpty ? 'Please enter a name' : null,
+              ),
               TextFormField(
                 controller: _caloriesController,
                 decoration: const InputDecoration(labelText: 'Calories'),
                 keyboardType: TextInputType.number,
-                validator: (value) => value!.isEmpty ? 'Please enter the calories' : null,
+                validator: (value) =>
+                    value!.isEmpty ? 'Please enter the calories' : null,
               ),
               TextFormField(
                 controller: _carbohydratesController,
-                decoration: const InputDecoration(labelText: 'Carbohydrates (g)'),
+                decoration:
+                    const InputDecoration(labelText: 'Carbohydrates (g)'),
                 keyboardType: TextInputType.number,
-                validator: (value) => value!.isEmpty ? 'Please enter the carbohydrates' : null,
+                validator: (value) =>
+                    value!.isEmpty ? 'Please enter the carbohydrates' : null,
               ),
               TextFormField(
                 controller: _fatsController,
                 decoration: const InputDecoration(labelText: 'Fats (g)'),
                 keyboardType: TextInputType.number,
-                validator: (value) => value!.isEmpty ? 'Please enter the fats' : null,
+                validator: (value) =>
+                    value!.isEmpty ? 'Please enter the fats' : null,
               ),
               TextFormField(
                 controller: _proteinsController,
                 decoration: const InputDecoration(labelText: 'Proteins (g)'),
                 keyboardType: TextInputType.number,
-                validator: (value) => value!.isEmpty ? 'Please enter the proteins' : null,
+                validator: (value) =>
+                    value!.isEmpty ? 'Please enter the proteins' : null,
               ),
             ],
           ),
@@ -113,7 +137,7 @@ class _MealFormDialogState extends State<MealFormDialog> {
         ),
         ElevatedButton(
           onPressed: _submitForm,
-          child: const Text('Submit'),
+          child: const Text('Save'),
         ),
       ],
     );
