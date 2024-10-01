@@ -23,6 +23,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
   final TextEditingController _mealNameController = TextEditingController();
   final TextEditingController _foodSearchController = TextEditingController();
   final TextEditingController _foodWeightController = TextEditingController();
+  bool mealExists = false;
 
   bool get isEdit => widget.mealId != null;
   List<SelectedFood> _selectedFoods = [];
@@ -46,126 +47,138 @@ class _MealDetailPageState extends State<MealDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
-      appBar: AppBar(
-        title: const Text('Meal Details'),
-        leading: BackButton(
-          onPressed: () {
-            BlocProvider.of<MealBloc>(context).add(LoadMeals());
-            Navigator.pop(context);
-          },
-        ),
-        backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
-        foregroundColor: Colors.white,
-      ),
-      body: PopScope(
-        canPop: false,
-        child: BlocBuilder<MealBloc, MealState>(
-          builder: (context, state) {
-            if (state is MealLoading) {
-              return const CircularProgressIndicator();
-            } else if (state is MealLoaded) {
-              _mealNameController.text = state.meal.name;
-              _selectedFoods = state.meal.selectedFoods != null
-                  ? state.meal.selectedFoods!
-                  : [];
-              for (var food in _selectedFoods) {
-                _calculateTotalValues(food);
-              }
-            } else if (state is CreateMeal) {}
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Meal Name
-                    TextFormField(
-                      controller: _mealNameController,
-                      style: const TextStyle(color: Colors.white),
-                      // Text input style
-                      decoration: const InputDecoration(
-                        labelText: 'Meal Name',
-                        labelStyle:
-                            TextStyle(color: Colors.white70), // Label style
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white70),
+    return BlocBuilder<MealBloc, MealState>(
+      builder: (context, state) {
+        if (state is MealLoading) {
+          return const CircularProgressIndicator();
+        } else if (state is MealLoaded) {
+          _mealNameController.text = state.meal.name;
+          _selectedFoods =
+              state.meal.selectedFoods != null ? state.meal.selectedFoods! : [];
+          for (var food in _selectedFoods) {
+            _calculateTotalValues(food);
+          }
+        } else if (state is CreateMeal) {
+        } else if (state is MealExists) {
+          mealExists = true;
+        } else if (state is MealNotExisting) {
+          mealExists = false;
+        }
+        return Scaffold(
+          backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
+          appBar: AppBar(
+            title: const Text('Meal Details'),
+            leading: BackButton(
+              onPressed: () {
+                BlocProvider.of<MealBloc>(context).add(LoadMeals());
+                Navigator.pop(context);
+              },
+            ),
+            backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
+            foregroundColor: Colors.white,
+          ),
+          body: PopScope(
+              canPop: false,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Meal Name
+                      TextFormField(
+                        controller: _mealNameController,
+                        style: const TextStyle(color: Colors.white),
+                        // Text input style
+                        decoration: const InputDecoration(
+                          labelText: 'Meal Name',
+                          labelStyle:
+                              TextStyle(color: Colors.white70), // Label style
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white70),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.cyanAccent),
+                          ),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.cyanAccent),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a meal name';
+                          }
+                          return null;
+                        },
+                        onChanged: (mealName) {
+                          BlocProvider.of<MealBloc>(context)
+                              .add(SearchMealByName(mealName));
+                        },
+                      ),
+                      if (mealExists)
+                        const Text(
+                          'Meal already exists!',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      const SizedBox(height: 20),
+                      // Searchable Dropdown for Food Selection
+                      buildSearchDropDown(),
+                      const SizedBox(height: 20),
+                      // Specify Food Weight
+                      TextFormField(
+                        controller: _foodWeightController,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: const InputDecoration(
+                          labelText: 'Food Weight (g)',
+                          labelStyle: TextStyle(color: Colors.white70),
+                          border: OutlineInputBorder(),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white70),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.cyanAccent),
+                          ),
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          if (value == null ||
+                              value.isEmpty ||
+                              num.tryParse(value) == null) {
+                            return 'Please enter the weight';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 10),
+
+                      // Add Food Button
+                      Center(
+                        child: IconButton(
+                          onPressed: _addFoodToMeal,
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.cyan, // Text color
+                          ),
+                          icon: const Icon(Icons.add),
                         ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a meal name';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    // Searchable Dropdown for Food Selection
-                    buildSearchDropDown(),
-                    const SizedBox(height: 20),
-                    // Specify Food Weight
-                    TextFormField(
-                      controller: _foodWeightController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        labelText: 'Food Weight (g)',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        border: OutlineInputBorder(),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white70),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.cyanAccent),
-                        ),
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter the weight';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 10),
 
-                    // Add Food Button
-                    Center(
-                      child: IconButton(
-                        onPressed: _addFoodToMeal,
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: Colors.cyan, // Text color
-                        ),
-                        icon: const Icon(Icons.add),
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    _selectedFoods.isEmpty
-                        ? Container()
-                        : buildRecapNutritionalValues(),
-                    const SizedBox(height: 20),
-                    // Display Selected Foods
-                    buildSelectedFoodList(),
-                  ],
+                      _selectedFoods.isEmpty
+                          ? Container()
+                          : buildRecapNutritionalValues(),
+                      // Display Selected Foods
+                      buildSelectedFoodList(),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _saveMeal,
-        backgroundColor: Colors.cyan,
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.save),
-      ),
+              )),
+          floatingActionButton: FloatingActionButton(
+            onPressed: mealExists ? null : _saveMeal,
+            backgroundColor: mealExists ? Colors.grey : Colors.cyan,
+            foregroundColor: Colors.white,
+            child: const Icon(Icons.save),
+          ),
+        );
+      },
     );
   }
 
@@ -199,7 +212,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
     );
   }
 
-  Center buildRecapNutritionalValues() {
+  Widget buildRecapNutritionalValues() {
     return Center(
       child: Card(
         color: const Color.fromRGBO(75, 85, 100, 1.0),
@@ -215,19 +228,23 @@ class _MealDetailPageState extends State<MealDetailPage> {
               const SizedBox(height: 10),
               Text(
                 'Calories: $totalCalories',
-                style: const TextStyle(color: Colors.white70),
+                style: const TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold),
               ),
               Text(
                 'Proteins: $totalProteins',
-                style: const TextStyle(color: Colors.white70),
+                style: const TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold),
               ),
               Text(
                 'Fats: $totalFats',
-                style: const TextStyle(color: Colors.white70),
+                style: const TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold),
               ),
               Text(
                 'Carbohydrates: $totalCarbohydrates',
-                style: const TextStyle(color: Colors.white70),
+                style: const TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -236,7 +253,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
     );
   }
 
-  BlocBuilder<FoodBloc, FoodState> buildSearchDropDown() {
+  Widget buildSearchDropDown() {
     return BlocBuilder<FoodBloc, FoodState>(builder: (context, state) {
       if (state is FoodsLoading) {
         return const CircularProgressIndicator();
@@ -294,6 +311,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
 
   void _addFoodToMeal() {
     if (_formKey.currentState!.validate()) {
+      FocusScope.of(context).requestFocus(FocusNode());
       // Find the selected food from the Bloc's state
       final foodsState = context.read<FoodBloc>().state;
       if (foodsState is FoodsLoaded) {
@@ -301,32 +319,44 @@ class _MealDetailPageState extends State<MealDetailPage> {
             .firstWhere((food) => food.foodId == _selectedFoodId);
         final weight = num.parse(_foodWeightController.text);
 
-        // Calculate scaled nutritional values based on the weight entered
-        final scaledCalories = (selectedFood.calories / 100) * weight;
-        final scaledProteins = (selectedFood.proteins / 100) * weight;
-        final scaledFats = (selectedFood.fats / 100) * weight;
-        final scaledCarbohydrates = (selectedFood.carbohydrates / 100) * weight;
+        if (_selectedFoods
+            .where((sf) => sf.food.foodId == _selectedFoodId)
+            .isEmpty) {
+          // Calculate scaled nutritional values based on the weight entered
+          final scaledCalories = (selectedFood.calories / 100) * weight;
+          final scaledProteins = (selectedFood.proteins / 100) * weight;
+          final scaledFats = (selectedFood.fats / 100) * weight;
+          final scaledCarbohydrates =
+              (selectedFood.carbohydrates / 100) * weight;
 
-        setState(() {
-          _selectedFoods.add(SelectedFood(
-            scaledCalories,
-            scaledProteins,
-            scaledCarbohydrates,
-            scaledFats,
-            food: selectedFood,
-            weight: weight,
+          setState(() {
+            _selectedFoods.add(SelectedFood(
+              scaledCalories,
+              scaledProteins,
+              scaledCarbohydrates,
+              scaledFats,
+              food: selectedFood,
+              weight: weight,
+            ));
+
+            // Update total nutritional values for all foods
+            totalCalories += scaledCalories;
+            totalProteins += scaledProteins;
+            totalFats += scaledFats;
+            totalCarbohydrates += scaledCarbohydrates;
+
+            _foodSearchController.clear();
+            _foodWeightController.clear();
+            _selectedFoodId = null;
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Food already added to the list!'),
+            backgroundColor: Colors.deepOrangeAccent,
+            closeIconColor: Colors.white,
+            showCloseIcon: true,
           ));
-
-          // Update total nutritional values for all foods
-          totalCalories += scaledCalories;
-          totalProteins += scaledProteins;
-          totalFats += scaledFats;
-          totalCarbohydrates += scaledCarbohydrates;
-
-          _foodSearchController.clear();
-          _foodWeightController.clear();
-          _selectedFoodId = null;
-        });
+        }
       }
     }
   }
@@ -368,6 +398,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
           closeIconColor: Colors.white,
           showCloseIcon: true,
         ));
+        _formKey!.currentState!.reset();
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -380,6 +411,11 @@ class _MealDetailPageState extends State<MealDetailPage> {
   }
 
   void _calculateTotalValues(SelectedFood food) {
+    totalCalories = 0;
+    totalProteins = 0;
+    totalCarbohydrates = 0;
+    totalFats = 0;
+
     totalCalories += food.scaledCalories;
     totalProteins += food.scaledProteins;
     totalFats += food.scaledFats;

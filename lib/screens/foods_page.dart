@@ -47,8 +47,13 @@ class FoodsPage extends StatelessWidget {
                       onDismissed: (direction) {
                         BlocProvider.of<FoodBloc>(context)
                             .add(DeleteFood(food.foodId));
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Food removed')));
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                          content: Text('Food removed'),
+                          backgroundColor: Colors.green,
+                          showCloseIcon: true,
+                          closeIconColor: Colors.white,
+                        ));
                       },
                       child: _cardItem(context, food),
                     );

@@ -19,6 +19,11 @@ class LoadMeal extends MealEvent {
 }
 
 class CreatingMeal extends MealEvent {}
+class SearchMealByName extends MealEvent {
+  final String mealName;
+
+  const SearchMealByName(this.mealName);
+}
 
 class AddMeal extends MealEvent {
   final Meal meal;

@@ -10,6 +10,8 @@ abstract class IMealRepository {
 
   Future<Meal> getMealWithFoods(String mealId);
 
+  Future<bool> searchMealByName(String mealName);
+
   Future<void> addMeal(Meal meal);
 
   Future<void> updateMealWithFoods(String mealId, Meal meal);
@@ -75,6 +77,13 @@ class MealRepository implements IMealRepository {
       name: mealData['Name'] as String,
       selectedFoods: selectedFoodList,
     );
+  }
+
+  @override
+  Future<bool> searchMealByName(String mealName) async{
+    final db = await _databaseHelper.database;
+    final meal = await db.query('Meals', where: 'Name = ?', whereArgs: [mealName]);
+    return meal.isNotEmpty;
   }
 
   @override

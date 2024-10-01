@@ -27,6 +27,8 @@ class MealLoaded extends MealState {
   List<Object> get props => [meal];
 }
 
+class MealExists extends MealState {}
+class MealNotExisting extends MealState{}
 class CreateMeal extends MealState {}
 
 class MealsError extends MealState {

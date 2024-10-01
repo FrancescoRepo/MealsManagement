@@ -15,6 +15,7 @@ class MealBloc extends Bloc<MealEvent, MealState> {
     on<LoadMeals>(_onLoadMeals);
     on<LoadMeal>(_onLoadMeal);
     on<CreatingMeal>(_onCreatingMeal);
+    on<SearchMealByName>(_onSearchMealByName);
     on<AddMeal>(_onAddMeal);
     on<UpdateMeal>(_onUpdateMeal);
     on<DeleteMeal>(_onDeleteMeal);
@@ -42,6 +43,20 @@ class MealBloc extends Bloc<MealEvent, MealState> {
 
   void _onCreatingMeal(CreatingMeal event, Emitter<MealState> emit) {
     emit(CreateMeal());
+  }
+
+  void _onSearchMealByName(SearchMealByName event, Emitter<MealState> emit) async {
+    try {
+      final mealExists = await _mealRepository.searchMealByName(event.mealName);
+      if(mealExists) {
+        emit(MealExists());
+      } else {
+        emit(MealNotExisting());
+      }
+    }
+    catch(e) {
+      emit(const MealsError(errorMessage: "Failed to search the inserted meal"));
+    }
   }
 
   void _onAddMeal(AddMeal event, Emitter<MealState> emit) async {

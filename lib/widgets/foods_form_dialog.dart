@@ -114,36 +114,47 @@ class _FoodFormDialogState extends State<FoodFormDialog> {
                       style: TextStyle(color: Colors.red),
                     ),
                   TextFormField(
-                    controller: _caloriesController,
-                    decoration: const InputDecoration(labelText: 'Calories'),
-                    keyboardType: TextInputType.number,
-                    validator: (value) =>
-                        value!.isEmpty ? 'Please enter the calories' : null,
-                  ),
+                      controller: _caloriesController,
+                      decoration: const InputDecoration(labelText: 'Calories'),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value!.isEmpty || num.tryParse(value) == null) {
+                          return 'Please enter the calories';
+                        }
+                        return null;
+                      }),
                   TextFormField(
                     controller: _carbohydratesController,
                     decoration:
                         const InputDecoration(labelText: 'Carbohydrates (g)'),
                     keyboardType: TextInputType.number,
-                    validator: (value) => value!.isEmpty
-                        ? 'Please enter the carbohydrates'
-                        : null,
-                  ),
+                    validator: (value) {
+                      if (value!.isEmpty || num.tryParse(value) == null) {
+                        return 'Please enter the carbohydrates';
+                      }
+                      return null;
+                    }),
                   TextFormField(
                     controller: _fatsController,
                     decoration: const InputDecoration(labelText: 'Fats (g)'),
                     keyboardType: TextInputType.number,
-                    validator: (value) =>
-                        value!.isEmpty ? 'Please enter the fats' : null,
-                  ),
+                    validator: (value){
+                      if (value!.isEmpty || num.tryParse(value) == null) {
+                        return 'Please enter the fats';
+                      }
+                      return null;
+                    }),
                   TextFormField(
                     controller: _proteinsController,
                     decoration:
                         const InputDecoration(labelText: 'Proteins (g)'),
                     keyboardType: TextInputType.number,
-                    validator: (value) =>
-                        value!.isEmpty ? 'Please enter the proteins' : null,
-                  ),
+                    validator: (value) {
+                      if (value!.isEmpty || num.tryParse(value) == null) {
+                        return 'Please enter the proteins';
+                      }
+                      return null;
+                    }),
                 ],
               ),
             ),
