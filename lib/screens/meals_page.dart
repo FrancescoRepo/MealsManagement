@@ -9,6 +9,7 @@ import 'meal_detail_page.dart';
 class MealsPage extends StatelessWidget {
   const MealsPage({super.key});
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,10 +48,10 @@ class MealsPage extends StatelessWidget {
                         ),
                       ),
                       onDismissed: (direction) {
-                        /*BlocProvider.of<FoodBloc>(context)
-                            .add(DeleteFood(meal.foodId));*/
+                        BlocProvider.of<MealBloc>(context)
+                            .add(DeleteMeal(meal.mealId));
                         ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Food removed')));
+                            const SnackBar(content: Text('Meal removed')));
                       },
                       child: _cardItem(context, meal),
                     );
@@ -118,7 +119,7 @@ class MealsPage extends StatelessWidget {
       trailing: const Icon(Icons.keyboard_arrow_right,
           color: Colors.white, size: 30.0),
       onTap: () {
-        Navigator.push(
+         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => MealDetailPage(

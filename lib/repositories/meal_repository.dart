@@ -7,8 +7,14 @@ import '../models/meal_food.dart';
 
 abstract class IMealRepository {
   Future<List<Meal>> getMeals();
+
   Future<Meal> getMealWithFoods(String mealId);
+
   Future<void> addMeal(Meal meal);
+
+  Future<void> updateMealWithFoods(String mealId, Meal meal);
+
+  Future<void> deleteMeal(String mealId);
 }
 
 class MealRepository implements IMealRepository {
@@ -43,7 +49,7 @@ class MealRepository implements IMealRepository {
     );
 
     // Extract foodIds
-    final foodIds = mealFoodResult.map((mf) => mf['foodId']).toList();
+    final foodIds = mealFoodResult.map((mf) => mf['FoodId']).toList();
 
     // Query all the foods associated with the meal
     final foods = await db.query(
@@ -54,19 +60,15 @@ class MealRepository implements IMealRepository {
 
     // Convert food query result into Food objects
     List<SelectedFood> selectedFoodList = foods.map((f) {
-      var mf = MealFood.fromMap(mealFoodResult.where((mf) => mf['foodId'] == f['foodId'] && mf['mealId'] == mealId).first);
+      var mf = MealFood.fromMap(mealFoodResult
+          .where((mf) => mf['FoodId'] == f['FoodId'] && mf['MealId'] == mealId)
+          .first);
       var food = Food.fromMap(f);
-      return SelectedFood(
-        mf.scaledCalories,
-        mf.scaledProteins,
-        mf.scaledCarbohydrates,
-        mf.scaledFats,
-        food: food,
-        weight: mf.weight
-      );
+      return SelectedFood(mf.scaledCalories, mf.scaledProteins,
+          mf.scaledCarbohydrates, mf.scaledFats,
+          food: food, weight: mf.weight);
     }).toList();
 
-    print(selectedFoodList);
     // Return the Meal with the list of foods
     return Meal(
       mealId: mealData['MealId'] as String,
@@ -99,5 +101,33 @@ class MealRepository implements IMealRepository {
         });
       }
     }
+  }
+
+  @override
+  Future<void> updateMealWithFoods(String mealId, Meal meal) async {
+    final db = await _databaseHelper.database;
+    await db.update('Meals', meal.toMap(),
+        where: 'MealId = ?', whereArgs: [mealId]);
+    await db.delete('MealFood', where: 'MealId = ?', whereArgs: [mealId]);
+    if (meal.selectedFoods != null) {
+      for (var selectedFood in meal.selectedFoods!) {
+        // Insert the relation into the MealFood table
+        await db.insert('MealFood', {
+          'mealId': meal.mealId,
+          'foodId': selectedFood.food.foodId,
+          'weight': selectedFood.weight,
+          'scaledCalories': selectedFood.scaledCalories,
+          'scaledFats': selectedFood.scaledFats,
+          'scaledProteins': selectedFood.scaledProteins,
+          'scaledCarbohydrates': selectedFood.scaledCarbohydrates
+        });
+      }
+    }
+  }
+
+  @override
+  Future<void> deleteMeal(String mealId) async {
+    final db = await _databaseHelper.database;
+    await db.delete('Meals', where: 'MealId = ?', whereArgs: [mealId]);
   }
 }

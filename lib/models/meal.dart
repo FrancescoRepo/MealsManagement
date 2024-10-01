@@ -11,8 +11,14 @@ class Meal {
     this.selectedFoods,
   });
 
-  factory Meal.FromMap(Map<String, dynamic> meals) => Meal(
-      mealId: meals['MealId'],
-      name: meals['Name']
-    );
+  factory Meal.FromMap(Map<String, dynamic> meals) {
+    return Meal(mealId: meals['MealId'], name: meals['Name']);
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'MealId': mealId,
+      'Name': name,
+    };
+  }
 }

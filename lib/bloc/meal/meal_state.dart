@@ -27,6 +27,8 @@ class MealLoaded extends MealState {
   List<Object> get props => [meal];
 }
 
+class CreateMeal extends MealState {}
+
 class MealsError extends MealState {
   final String errorMessage;
   const MealsError({required this.errorMessage});

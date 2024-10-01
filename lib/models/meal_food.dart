@@ -15,7 +15,7 @@ class MealFood {
       map['MealId'],
       map['Weight'],
       map['ScaledCalories'],
-      map['scaledProteins'],
+      map['ScaledProteins'],
       map['ScaledCarbohydrates'],
       map['ScaledFats'],
     );

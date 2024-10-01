@@ -4,7 +4,6 @@ import 'package:mealsmanagement/bloc/food/food_bloc.dart';
 import 'package:mealsmanagement/bloc/meal/meal_bloc.dart';
 import 'package:mealsmanagement/repositories/food_repository.dart';
 import 'package:mealsmanagement/repositories/meal_repository.dart';
-import 'package:mealsmanagement/screens/home_page.dart';
 import 'package:mealsmanagement/CustomIcons.dart';
 import 'package:mealsmanagement/screens/meals_page.dart';
 
@@ -40,14 +39,13 @@ class MyApp extends StatelessWidget {
                     ..loadMeals())
         ],
         child: MaterialApp(
-          title: 'Flutter Demo',
+          title: 'Meals Management',
           theme: ThemeData(
-            //colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
             primaryColor: const Color.fromRGBO(58, 66, 86, 1.0),
             //useMaterial3: true,
           ),
           home: DefaultTabController(
-              length: 3,
+              length: 2,
               child: Scaffold(
                 backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
                 appBar: AppBar(
@@ -67,10 +65,6 @@ class MyApp extends StatelessWidget {
                   dividerColor: Color.fromRGBO(58, 66, 86, 1.0),
                   tabs: [
                     Tab(
-                      icon: Icon(Icons.home),
-                      text: 'Home',
-                    ),
-                    Tab(
                       icon: Icon(
                         Icons.fastfood,
                       ),
@@ -85,7 +79,6 @@ class MyApp extends StatelessWidget {
                   unselectedLabelColor: Colors.white,
                 ),
                 body: TabBarView(children: [
-                  HomePage(key: key),
                   FoodsPage(
                     key: key,
                   ),

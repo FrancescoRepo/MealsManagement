@@ -23,6 +23,8 @@ class _MealDetailPageState extends State<MealDetailPage> {
   final TextEditingController _mealNameController = TextEditingController();
   final TextEditingController _foodSearchController = TextEditingController();
   final TextEditingController _foodWeightController = TextEditingController();
+
+  bool get isEdit => widget.mealId != null;
   List<SelectedFood> _selectedFoods = [];
 
   num totalCalories = 0;
@@ -35,8 +37,10 @@ class _MealDetailPageState extends State<MealDetailPage> {
   void initState() {
     super.initState();
     context.read<FoodBloc>().add(LoadFoods());
-    if (widget.mealId != null) {
+    if (isEdit) {
       context.read<MealBloc>().add(LoadMeal(widget.mealId!));
+    } else {
+      context.read<MealBloc>().add(CreatingMeal());
     }
   }
 
@@ -46,18 +50,31 @@ class _MealDetailPageState extends State<MealDetailPage> {
       backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
       appBar: AppBar(
         title: const Text('Meal Details'),
+        leading: BackButton(
+          onPressed: () {
+            BlocProvider.of<MealBloc>(context).add(LoadMeals());
+            Navigator.pop(context);
+          },
+        ),
         backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
         foregroundColor: Colors.white,
       ),
-      body: BlocBuilder<MealBloc, MealState>(
-        builder: (context, state) {
-          if (state is MealLoading) {
-            return const CircularProgressIndicator();
-          } else if (state is MealLoaded) {
-            _mealNameController.text = state.meal.name;
-            _selectedFoods = state.meal.selectedFoods != null ? state.meal.selectedFoods! : [];
-            for (var food in _selectedFoods) {
-              _calculateTotalValues(food);
+      body: PopScope(
+        canPop: false,
+        child: BlocBuilder<MealBloc, MealState>(
+          builder: (context, state) {
+            if (state is MealLoading) {
+              return const CircularProgressIndicator();
+            } else if (state is MealLoaded) {
+              _mealNameController.text = state.meal.name;
+              _selectedFoods = state.meal.selectedFoods != null
+                  ? state.meal.selectedFoods!
+                  : [];
+              for (var food in _selectedFoods) {
+                _calculateTotalValues(food);
+              }
+            } else if(state is CreateMeal) {
+
             }
             return Padding(
               padding: const EdgeInsets.all(16.0),
@@ -140,10 +157,8 @@ class _MealDetailPageState extends State<MealDetailPage> {
                 ),
               ),
             );
-          }
-
-          return Container();
-        },
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _saveMeal,
@@ -330,12 +345,30 @@ class _MealDetailPageState extends State<MealDetailPage> {
 
   void _saveMeal() {
     if (_mealNameController.text.isNotEmpty && _selectedFoods.isNotEmpty) {
+      FocusScope.of(context).requestFocus(FocusNode());
       final meal = Meal(
           mealId: Guid.newGuid.toString(),
           name: _mealNameController.text,
           selectedFoods: _selectedFoods);
-      BlocProvider.of<MealBloc>(context).add(AddMeal(meal));
-      Navigator.pop(context);
+      if (!isEdit) {
+        BlocProvider.of<MealBloc>(context).add(AddMeal(meal));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Meal added successfully'),
+          backgroundColor: Colors.green,
+          closeIconColor: Colors.white,
+          showCloseIcon: true,
+        ));
+        Navigator.pop(context);
+      } else {
+        BlocProvider.of<MealBloc>(context)
+            .add(UpdateMeal(widget.mealId!, meal));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Meal updated successfully'),
+          backgroundColor: Colors.green,
+          closeIconColor: Colors.white,
+          showCloseIcon: true,
+        ));
+      }
     }
   }
 
