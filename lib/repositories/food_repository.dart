@@ -4,6 +4,7 @@ import 'database_helper.dart';
 
 abstract class IFoodRepository {
   Future<List<Food>> getFoods();
+  Future<bool> searchFoodByName(String foodName);
   Future<void> addFood(Food food);
   Future<void> updateFood(String foodId, Food food);
   Future<void> deleteFood(String foodId);
@@ -38,6 +39,13 @@ class FoodRepository implements IFoodRepository {
   Future<void> deleteFood(String foodId) async {
     final db = await _databaseHelper.database;
     await db.delete('Foods', where: 'FoodId = ?', whereArgs: [foodId]);
+  }
+
+  @override
+  Future<bool> searchFoodByName(String foodName) async{
+    final db = await _databaseHelper.database;
+    final food = await db.query('Foods', where: 'Name = ?', whereArgs: [foodName]);
+    return food.isNotEmpty;
   }
 
 }

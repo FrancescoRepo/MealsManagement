@@ -73,9 +73,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
               for (var food in _selectedFoods) {
                 _calculateTotalValues(food);
               }
-            } else if(state is CreateMeal) {
-
-            }
+            } else if (state is CreateMeal) {}
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: Form(
@@ -136,13 +134,15 @@ class _MealDetailPageState extends State<MealDetailPage> {
                     const SizedBox(height: 10),
 
                     // Add Food Button
-                    ElevatedButton(
-                      onPressed: _addFoodToMeal,
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Colors.cyan, // Text color
+                    Center(
+                      child: IconButton(
+                        onPressed: _addFoodToMeal,
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.cyan, // Text color
+                        ),
+                        icon: const Icon(Icons.add),
                       ),
-                      child: const Text('Add Food to Meal'),
                     ),
 
                     const SizedBox(height: 20),
@@ -344,7 +344,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
   }
 
   void _saveMeal() {
-    if (_mealNameController.text.isNotEmpty && _selectedFoods.isNotEmpty) {
+    if (_mealNameController.text.isNotEmpty) {
       FocusScope.of(context).requestFocus(FocusNode());
       final meal = Meal(
           mealId: Guid.newGuid.toString(),
@@ -369,6 +369,13 @@ class _MealDetailPageState extends State<MealDetailPage> {
           showCloseIcon: true,
         ));
       }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Please insert at least the name of the meal'),
+        backgroundColor: Colors.deepOrangeAccent,
+        closeIconColor: Colors.white,
+        showCloseIcon: true,
+      ));
     }
   }
 

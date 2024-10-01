@@ -10,6 +10,14 @@ abstract class FoodEvent {
 
 class LoadFoods extends FoodEvent{}
 
+class SearchFoodByName extends FoodEvent {
+  final String foodName;
+
+  const SearchFoodByName(this.foodName);
+
+  @override
+  List<Object> get props => [foodName];
+}
 class AddFood extends FoodEvent {
   final Food food;
   const AddFood(this.food);

@@ -13,6 +13,7 @@ class FoodBloc extends Bloc<FoodEvent, FoodState> {
 
   FoodBloc(this._foodRepository) : super(FoodsLoading()) {
     on<LoadFoods>(_onLoadFoods);
+    on<SearchFoodByName>(_onSearchFoodByName);
     on<AddFood>(_onAddFood);
     on<UpdateFood>(_onUpdateFood);
     on<DeleteFood>(_onDeleteFood);
@@ -25,6 +26,20 @@ class FoodBloc extends Bloc<FoodEvent, FoodState> {
     }
     catch(e) {
         emit(const FoodsError(errorMessage: "Failed to load foods"));
+    }
+  }
+
+  void _onSearchFoodByName(SearchFoodByName event, Emitter<FoodState> emit) async {
+    try {
+      final foodExists = await _foodRepository.searchFoodByName(event.foodName);
+      if(foodExists) {
+        emit(FoodExist());
+      } else {
+        emit(FoodNotExisting());
+      }
+    }
+    catch(e) {
+      emit(const FoodsError(errorMessage: "Failed to search the inserted food"));
     }
   }
 

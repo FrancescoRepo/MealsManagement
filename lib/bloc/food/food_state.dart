@@ -18,6 +18,9 @@ class FoodsLoaded extends FoodState {
   List<Object> get props => [];
 }
 
+class FoodExist extends FoodState{}
+class FoodNotExisting extends FoodState{}
+
 class FoodsError extends FoodState {
   final String errorMessage;
   const FoodsError({required this.errorMessage});
