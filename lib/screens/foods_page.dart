@@ -124,12 +124,12 @@ class FoodsPage extends StatelessWidget {
             const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
       subtitle: Wrap(
-        spacing: 3.0, // Space between chips
+        spacing: 15.0, // Space between chips
         runSpacing: 0.1, // Space between rows
         children: <Widget>[
           Chip(
             label: Text(
-              "Protein: ${food.proteins.toString()}",
+              "Protein: ${food.proteins.truncate().toString()}",
               style: const TextStyle(color: Colors.white),
             ),
             padding: const EdgeInsets.all(0),
@@ -137,7 +137,7 @@ class FoodsPage extends StatelessWidget {
           ),
           Chip(
             label: Text(
-              "kCal: ${food.calories.toString()}",
+              "kCal: ${food.calories.truncate().toString()}",
               style: const TextStyle(color: Colors.white),
             ),
             padding: const EdgeInsets.all(0),
@@ -145,7 +145,7 @@ class FoodsPage extends StatelessWidget {
           ),
           Chip(
             label: Text(
-              "Carbs: ${food.carbohydrates.toString()}",
+              "Carbs: ${food.carbohydrates.truncate().toString()}",
               style: const TextStyle(color: Colors.white),
             ),
             padding: const EdgeInsets.all(0),
@@ -153,7 +153,7 @@ class FoodsPage extends StatelessWidget {
           ),
           Chip(
             label: Text(
-              "Fats: ${food.fats.toString()}",
+              "Fats: ${food.fats.truncate().toString()}",
               style: const TextStyle(color: Colors.white),
             ),
             padding: const EdgeInsets.all(0),

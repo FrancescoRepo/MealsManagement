@@ -120,6 +120,44 @@ class MealsPage extends StatelessWidget {
         style:
             const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
+      subtitle: Wrap(
+        spacing: 3.0, // Space between chips
+        runSpacing: 0.1, // Space between rows
+        children: <Widget>[
+          Chip(
+            label: Text(
+              "Tot Protein: ${meal.totalProteins.truncate().toString()}",
+              style: const TextStyle(color: Colors.white),
+            ),
+            padding: const EdgeInsets.all(0),
+            backgroundColor: Colors.cyan,
+          ),
+          Chip(
+            label: Text(
+              "Tot kCal: ${meal.totalCalories.truncate().toString()}",
+              style: const TextStyle(color: Colors.white),
+            ),
+            padding: const EdgeInsets.all(0),
+            backgroundColor: Colors.cyan,
+          ),
+          Chip(
+            label: Text(
+              "Tot Carbs: ${meal.totalCarbohydrates.truncate().toString()}",
+              style: const TextStyle(color: Colors.white),
+            ),
+            padding: const EdgeInsets.all(0),
+            backgroundColor: Colors.cyan,
+          ),
+          Chip(
+            label: Text(
+              "Tot Fats: ${meal.totalFats.truncate().toString()}",
+              style: const TextStyle(color: Colors.white),
+            ),
+            padding: const EdgeInsets.all(0),
+            backgroundColor: Colors.cyan,
+          ),
+        ],
+      ),
       trailing: const Icon(Icons.keyboard_arrow_right,
           color: Colors.white, size: 30.0),
       onTap: () {

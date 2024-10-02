@@ -41,7 +41,7 @@ class MealRepository implements IMealRepository {
       whereArgs: [mealId],
     );
 
-    final mealData = mealResult.first;
+    final mealData = Meal.FromMap(mealResult.first);
 
     // Query the meal-food relationships
     final mealFoodResult = await db.query(
@@ -73,16 +73,21 @@ class MealRepository implements IMealRepository {
 
     // Return the Meal with the list of foods
     return Meal(
-      mealId: mealData['MealId'] as String,
-      name: mealData['Name'] as String,
+      mealData.totalCalories,
+      mealData.totalProteins,
+      mealData.totalFats,
+      mealData.totalCarbohydrates,
+      mealId: mealData.mealId,
+      name: mealData.name,
       selectedFoods: selectedFoodList,
     );
   }
 
   @override
-  Future<bool> searchMealByName(String mealName) async{
+  Future<bool> searchMealByName(String mealName) async {
     final db = await _databaseHelper.database;
-    final meal = await db.query('Meals', where: 'Name = ?', whereArgs: [mealName]);
+    final meal =
+        await db.query('Meals', where: 'Name = ?', whereArgs: [mealName]);
     return meal.isNotEmpty;
   }
 
@@ -94,6 +99,10 @@ class MealRepository implements IMealRepository {
     await db.insert('Meals', {
       'mealId': meal.mealId,
       'name': meal.name,
+      'totalCalories': meal.totalCalories,
+      'totalProteins': meal.totalProteins,
+      'totalFats': meal.totalFats,
+      'totalCarbohydrates': meal.totalCarbohydrates
     });
 
     if (meal.selectedFoods != null) {

@@ -227,22 +227,22 @@ class _MealDetailPageState extends State<MealDetailPage> {
               ),
               const SizedBox(height: 10),
               Text(
-                'Calories: $totalCalories',
+                'Calories: ${totalCalories.truncate()}',
                 style: const TextStyle(
                     color: Colors.white, fontWeight: FontWeight.bold),
               ),
               Text(
-                'Proteins: $totalProteins',
+                'Proteins: ${totalProteins.truncate()}',
                 style: const TextStyle(
                     color: Colors.white, fontWeight: FontWeight.bold),
               ),
               Text(
-                'Fats: $totalFats',
+                'Fats: ${totalFats.truncate()}',
                 style: const TextStyle(
                     color: Colors.white, fontWeight: FontWeight.bold),
               ),
               Text(
-                'Carbohydrates: $totalCarbohydrates',
+                'Carbohydrates: ${totalCarbohydrates.truncate()}',
                 style: const TextStyle(
                     color: Colors.white, fontWeight: FontWeight.bold),
               ),
@@ -377,6 +377,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
     if (_mealNameController.text.isNotEmpty) {
       FocusScope.of(context).requestFocus(FocusNode());
       final meal = Meal(
+          totalCalories, totalProteins, totalFats, totalCarbohydrates,
           mealId: Guid.newGuid.toString(),
           name: _mealNameController.text,
           selectedFoods: _selectedFoods);
@@ -398,7 +399,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
           closeIconColor: Colors.white,
           showCloseIcon: true,
         ));
-        _formKey!.currentState!.reset();
+        //_formKey!.currentState!.reset();
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

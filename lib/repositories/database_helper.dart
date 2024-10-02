@@ -37,7 +37,11 @@ class DatabaseHelper {
         await db.execute('''
           CREATE TABLE Meals (
             MealId TEXT PRIMARY KEY,
-            Name TEXT
+            Name TEXT,
+            TotalCalories REAL NULL,
+            TotalProteins REAL NULL,
+            TotalFats REAL NULL,
+            TotalCarbohydrates REAL NULL
           );
         ''');
 
