@@ -44,6 +44,7 @@ class MyApp extends StatelessWidget {
             primaryColor: const Color.fromRGBO(58, 66, 86, 1.0),
             //useMaterial3: true,
           ),
+          debugShowCheckedModeBanner: false,
           home: DefaultTabController(
               length: 2,
               child: Scaffold(
