@@ -47,46 +47,58 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           home: DefaultTabController(
               length: 2,
-              child: Scaffold(
-                backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
-                appBar: AppBar(
-                  centerTitle: true,
-                  backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
-                  title: const Text(
-                    "Meals Management",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontStyle: FontStyle.italic,
-                        fontWeight: FontWeight.w700),
-                  ),
-                ),
-                bottomNavigationBar: const TabBar(
-                  automaticIndicatorColorAdjustment: true,
-                  indicatorColor: Colors.white,
-                  dividerColor: Color.fromRGBO(58, 66, 86, 1.0),
-                  tabs: [
-                    Tab(
-                      icon: Icon(
-                        Icons.fastfood,
+              child: Builder(
+                builder: (context) {
+                  final TabController controller = DefaultTabController.of(context)!;
+                  controller!.addListener(() {
+                    if(controller.index == 0) {
+                      BlocProvider.of<FoodBloc>(context).add(LoadFoods());
+                    } else {
+                      BlocProvider.of<MealBloc>(context).add(LoadMeals());
+                    }
+                  });
+                  return Scaffold(
+                    backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
+                    appBar: AppBar(
+                      centerTitle: true,
+                      backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
+                      title: const Text(
+                        "Meals Management",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.w700),
                       ),
-                      text: 'Foods',
                     ),
-                    Tab(
-                      icon: Icon(CustomIcons.food),
-                      text: 'Meals',
+                    bottomNavigationBar: const TabBar(
+                      automaticIndicatorColorAdjustment: true,
+                      indicatorColor: Colors.white,
+                      dividerColor: Color.fromRGBO(58, 66, 86, 1.0),
+                      tabs: [
+                        Tab(
+                          icon: Icon(
+                            Icons.fastfood,
+                          ),
+                          text: 'Foods',
+                        ),
+                        Tab(
+                          icon: Icon(CustomIcons.food),
+                          text: 'Meals',
+                        ),
+                      ],
+                      labelColor: Colors.white,
+                      unselectedLabelColor: Colors.white,
                     ),
-                  ],
-                  labelColor: Colors.white,
-                  unselectedLabelColor: Colors.white,
-                ),
-                body: TabBarView(children: [
-                  FoodsPage(
-                    key: key,
-                  ),
-                  MealsPage(
-                    key: key,
-                  )
-                ]),
+                    body: TabBarView(children: [
+                      FoodsPage(
+                        key: key,
+                      ),
+                      MealsPage(
+                        key: key,
+                      )
+                    ]),
+                  );
+                }
               )),
         ),
       ),
