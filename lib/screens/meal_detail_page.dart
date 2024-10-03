@@ -119,10 +119,10 @@ class _MealDetailPageState extends State<MealDetailPage> {
                           'Meal already exists!',
                           style: TextStyle(color: Colors.red),
                         ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
                       // Searchable Dropdown for Food Selection
                       buildSearchDropDown(),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
                       // Specify Food Weight
                       TextFormField(
                         controller: _foodWeightController,
@@ -148,7 +148,6 @@ class _MealDetailPageState extends State<MealDetailPage> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 10),
 
                       // Add Food Button
                       Center(
