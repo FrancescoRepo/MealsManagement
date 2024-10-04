@@ -377,7 +377,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
       FocusScope.of(context).requestFocus(FocusNode());
       final meal = Meal(
           totalCalories, totalProteins, totalFats, totalCarbohydrates,
-          mealId: Guid.newGuid.toString(),
+          mealId: isEdit ? widget.mealId! : Guid.newGuid.toString(),
           name: _mealNameController.text,
           selectedFoods: _selectedFoods);
       if (!isEdit) {

@@ -1,62 +1,46 @@
 import 'package:mealsmanagement/models/food.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/meal.dart';
 import '../models/meal_food.dart';
-import 'database_helper.dart';
+import 'interfaces/IFoodRepository.dart';
 
-abstract class IFoodRepository {
-  Future<List<Food>> getFoods();
 
-  Future<bool> searchFoodByName(String foodName);
-
-  Future<void> addFood(Food food);
-
-  Future<void> updateFood(String foodId, Food food);
-
-  Future<void> deleteFood(String foodId);
-}
 
 class FoodRepository implements IFoodRepository {
-  final DatabaseHelper _databaseHelper = DatabaseHelper();
+  final supabase = Supabase.instance.client;
 
   @override
   Future<List<Food>> getFoods() async {
-    final db = await _databaseHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query('Foods');
+    final foods = await supabase.from("Foods").select();
 
-    return List.generate(maps.length, (i) {
-      return Food.fromMap(maps[i]);
+    return List.generate(foods.length, (i) {
+      return Food.fromMap(foods[i]);
     });
   }
 
   @override
   Future<void> addFood(Food food) async {
-    final db = await _databaseHelper.database;
-    await db.insert('Foods', food.toMap());
+    await supabase.from('Foods').insert(food.toMap());
   }
 
   @override
   Future<void> updateFood(String foodId, Food food) async {
-    final db = await _databaseHelper.database;
-    await db.update(
-        'Foods', food.toMap(), where: 'FoodId = ?', whereArgs: [foodId]);
+    await supabase.from('Foods').update(food.toMap()).eq('FoodId', foodId);
   }
 
   @override
   Future<void> deleteFood(String foodId) async {
-    final db = await _databaseHelper.database;
-    final food = Food.fromMap((await db.query(
-        'Foods', where: 'FoodId = ?', whereArgs: [foodId])).first);
-    final mealFoods = await db.query(
-        'MealFood', where: 'FoodId = ?', whereArgs: [foodId]);
+    final food = Food.fromMap((await supabase.from('Foods').select().eq('FoodId', foodId)).first);
+    final mealFoods = await supabase.from('MealFood').select().eq('FoodId', foodId);
+
     final mealIds = mealFoods.map((mf) =>
     MealFood
         .fromMap(mf)
         .mealId).toList();
     for (var mealId in mealIds) {
       final meal = Meal.FromMap(
-          (await db.query('Meals', where: 'MealId = ?', whereArgs: [mealId]))
-              .first);
+          (await supabase.from('Meals').select().eq('MealId', mealId)).first);
       final updatedMeal = Meal(
           meal.totalCalories - food.calories,
           meal.totalProteins - food.proteins,
@@ -65,17 +49,15 @@ class FoodRepository implements IFoodRepository {
           mealId: meal.mealId,
           name: meal.name
       );
-      await db.update('Meals', updatedMeal.toMap(), where: 'MealId = ?', whereArgs: [mealId]);
+      await supabase.from('Meals').update(updatedMeal.toMap()).eq('MealId', mealId);
     }
-    await db.delete('Foods', where: 'FoodId = ?', whereArgs: [foodId]);
-    await db.delete('MealFood', where: 'FoodId = ?', whereArgs: [foodId]);
+    await supabase.from('Foods').delete().eq('FoodId', foodId);
+    await supabase.from('MealFood').delete().eq('FoodId', foodId);
   }
 
   @override
   Future<bool> searchFoodByName(String foodName) async {
-    final db = await _databaseHelper.database;
-    final food = await db.query(
-        'Foods', where: 'Name = ?', whereArgs: [foodName]);
+    final food = await supabase.from('Foods').select().eq('Name', foodName);
     return food.isNotEmpty;
   }
 
