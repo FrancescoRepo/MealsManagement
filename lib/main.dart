@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mealsmanagement/bloc/food/food_bloc.dart';
 import 'package:mealsmanagement/bloc/meal/meal_bloc.dart';
+import 'package:mealsmanagement/bloc/meal/meal_detail_cubit.dart';
 import 'package:mealsmanagement/repositories/food_repository.dart';
 import 'package:mealsmanagement/repositories/meal_repository.dart';
 import 'package:mealsmanagement/CustomIcons.dart';
@@ -14,7 +15,8 @@ import 'screens/foods_page.dart';
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
 
-  await Supabase.initialize(url: dotenv.env["SUPABASE_URL"]!, anonKey: dotenv.env["SUPABASE_KEY"]!);
+  await Supabase.initialize(
+      url: dotenv.env["SUPABASE_URL"]!, anonKey: dotenv.env["SUPABASE_KEY"]!);
   runApp(const MainApp());
 }
 
@@ -41,7 +43,8 @@ class MainApp extends StatelessWidget {
           BlocProvider(
               create: (context) =>
                   MealBloc(RepositoryProvider.of<MealRepository>(context))
-                    ..loadMeals())
+                    ..loadMeals()),
+          BlocProvider(create: (_) => MealDetailCubit())
         ],
         child: MaterialApp(
           title: 'Meals Management',

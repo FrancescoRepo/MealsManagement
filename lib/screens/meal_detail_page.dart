@@ -4,6 +4,7 @@ import 'package:flutter_guid/flutter_guid.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:mealsmanagement/bloc/food/food_bloc.dart';
 import 'package:mealsmanagement/bloc/meal/meal_bloc.dart';
+import 'package:mealsmanagement/bloc/meal/meal_detail_cubit.dart';
 
 import '../models/food.dart';
 import '../models/meal.dart';
@@ -26,12 +27,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
   bool mealExists = false;
 
   bool get isEdit => widget.mealId != null;
-  List<SelectedFood> _selectedFoods = [];
-
-  num totalCalories = 0;
-  num totalProteins = 0;
-  num totalCarbohydrates = 0;
-  num totalFats = 0;
+  bool selectedFoodsEmpty = true;
   String? _selectedFoodId;
 
   @override
@@ -47,37 +43,35 @@ class _MealDetailPageState extends State<MealDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MealBloc, MealState>(
-      builder: (context, state) {
-        if (state is MealLoading) {
-          return const CircularProgressIndicator();
-        } else if (state is MealLoaded) {
-          _mealNameController.text = state.meal.name;
-          _selectedFoods =
-              state.meal.selectedFoods != null ? state.meal.selectedFoods! : [];
-          for (var food in _selectedFoods) {
-            _calculateTotalValues(food);
+    return Scaffold(
+      backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
+      appBar: AppBar(
+        title: const Text('Meal Details'),
+        leading: BackButton(
+          onPressed: () {
+            context.read<MealBloc>().add(LoadMeals());
+            Navigator.pop(context);
+          },
+        ),
+        backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
+        foregroundColor: Colors.white,
+      ),
+      body: BlocBuilder<MealBloc, MealState>(
+        builder: (context, state) {
+          if (state is MealLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is MealLoaded) {
+            _mealNameController.text = state.meal.name;
+            selectedFoodsEmpty = state.meal.selectedFoods == null;
+            context.read<MealDetailCubit>().loadMealFoods(
+                selectedFoodsEmpty ? [] : state.meal.selectedFoods!);
+          } else if (state is CreateMeal) {
+          } else if (state is MealExists) {
+            mealExists = true;
+          } else if (state is MealNotExisting) {
+            mealExists = false;
           }
-        } else if (state is CreateMeal) {
-        } else if (state is MealExists) {
-          mealExists = true;
-        } else if (state is MealNotExisting) {
-          mealExists = false;
-        }
-        return Scaffold(
-          backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
-          appBar: AppBar(
-            title: const Text('Meal Details'),
-            leading: BackButton(
-              onPressed: () {
-                BlocProvider.of<MealBloc>(context).add(LoadMeals());
-                Navigator.pop(context);
-              },
-            ),
-            backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
-            foregroundColor: Colors.white,
-          ),
-          body: PopScope(
+          return PopScope(
               canPop: false,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -161,7 +155,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
                         ),
                       ),
 
-                      _selectedFoods.isEmpty
+                      selectedFoodsEmpty
                           ? Container()
                           : buildRecapNutritionalValues(),
                       // Display Selected Foods
@@ -169,86 +163,94 @@ class _MealDetailPageState extends State<MealDetailPage> {
                     ],
                   ),
                 ),
-              )),
-          floatingActionButton: FloatingActionButton(
-            onPressed: mealExists ? null : _saveMeal,
-            backgroundColor: mealExists ? Colors.grey : Colors.cyan,
-            foregroundColor: Colors.white,
-            child: const Icon(Icons.save),
+              ));
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: mealExists ? null : _saveMeal,
+        backgroundColor: mealExists ? Colors.grey : Colors.cyan,
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.save),
+      ),
+    );
+  }
+
+  Widget buildSelectedFoodList() {
+    return BlocBuilder<MealDetailCubit, MealDetailState>(
+      builder: (context, state) {
+        return Expanded(
+          child: ListView.builder(
+            itemCount: state.selectedFoods.length,
+            itemBuilder: (context, index) {
+              final selectedFood = state.selectedFoods[index];
+              return Card(
+                color: const Color.fromRGBO(75, 85, 100, 1.0),
+                child: ListTile(
+                  title: Text(
+                    '${selectedFood.food.name} - ${selectedFood.weight}g',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  subtitle: Text(
+                    'Calories: ${selectedFood.scaledCalories.truncate()}, Proteins: ${selectedFood.scaledProteins.truncate()}, Fats: ${selectedFood.scaledFats.truncate()}, Carbs: ${selectedFood.scaledCarbohydrates.truncate()}',
+                    style: const TextStyle(color: Colors.white70),
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      _removeFoodFromMeal(index);
+                    },
+                  ),
+                ),
+              );
+            },
           ),
         );
       },
     );
   }
 
-  Expanded buildSelectedFoodList() {
-    return Expanded(
-      child: ListView.builder(
-        itemCount: _selectedFoods.length,
-        itemBuilder: (context, index) {
-          final selectedFood = _selectedFoods[index];
-          return Card(
+  Widget buildRecapNutritionalValues() {
+    return BlocBuilder<MealDetailCubit, MealDetailState>(
+      builder: (context, state) {
+        return Center(
+          child: Card(
             color: const Color.fromRGBO(75, 85, 100, 1.0),
-            child: ListTile(
-              title: Text(
-                '${selectedFood.food.name} - ${selectedFood.weight}g',
-                style: const TextStyle(color: Colors.white),
-              ),
-              subtitle: Text(
-                'Calories: ${selectedFood.food.calories}, Proteins: ${selectedFood.food.proteins}, Fats: ${selectedFood.food.fats}, Carbs: ${selectedFood.food.carbohydrates}',
-                style: const TextStyle(color: Colors.white70),
-              ),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () {
-                  _removeFoodFromMeal(index);
-                },
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Total Nutritional Values:',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Calories: ${state.totalCalories.truncate()}',
+                    style: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    'Proteins: ${state.totalProteins.truncate()}',
+                    style: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    'Fats: ${state.totalFats.truncate()}',
+                    style: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    'Carbohydrates: ${state.totalCarbohydrates.truncate()}',
+                    style: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
             ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget buildRecapNutritionalValues() {
-    return Center(
-      child: Card(
-        color: const Color.fromRGBO(75, 85, 100, 1.0),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Total Nutritional Values:',
-                style: TextStyle(color: Colors.white, fontSize: 16),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Calories: ${totalCalories.truncate()}',
-                style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                'Proteins: ${totalProteins.truncate()}',
-                style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                'Fats: ${totalFats.truncate()}',
-                style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                'Carbohydrates: ${totalCarbohydrates.truncate()}',
-                style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-            ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -296,11 +298,8 @@ class _MealDetailPageState extends State<MealDetailPage> {
             );
           },
           onSelected: (Food suggestion) {
-            setState(() {
-              _selectedFoodId = suggestion.foodId;
-              _foodSearchController.text =
-                  suggestion.name; // Update text with selected food name
-            });
+            _selectedFoodId = suggestion.foodId;
+            _foodSearchController.text = suggestion.name;
           },
         );
       }
@@ -317,8 +316,9 @@ class _MealDetailPageState extends State<MealDetailPage> {
         final selectedFood = foodsState.foods
             .firstWhere((food) => food.foodId == _selectedFoodId);
         final weight = num.parse(_foodWeightController.text);
+        final mealDetailState = context.read<MealDetailCubit>().state;
 
-        if (_selectedFoods
+        if (mealDetailState.selectedFoods
             .where((sf) => sf.food.foodId == _selectedFoodId)
             .isEmpty) {
           // Calculate scaled nutritional values based on the weight entered
@@ -328,26 +328,18 @@ class _MealDetailPageState extends State<MealDetailPage> {
           final scaledCarbohydrates =
               (selectedFood.carbohydrates / 100) * weight;
 
-          setState(() {
-            _selectedFoods.add(SelectedFood(
-              scaledCalories,
-              scaledProteins,
-              scaledCarbohydrates,
-              scaledFats,
-              food: selectedFood,
-              weight: weight,
-            ));
+          context.read<MealDetailCubit>().addFoodToMeal(SelectedFood(
+                scaledCalories,
+                scaledProteins,
+                scaledCarbohydrates,
+                scaledFats,
+                food: selectedFood,
+                weight: weight,
+              ));
 
-            // Update total nutritional values for all foods
-            totalCalories += scaledCalories;
-            totalProteins += scaledProteins;
-            totalFats += scaledFats;
-            totalCarbohydrates += scaledCarbohydrates;
-
-            _foodSearchController.clear();
-            _foodWeightController.clear();
-            _selectedFoodId = null;
-          });
+          _foodSearchController.clear();
+          _foodWeightController.clear();
+          _selectedFoodId = null;
         } else {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Food already added to the list!'),
@@ -361,27 +353,24 @@ class _MealDetailPageState extends State<MealDetailPage> {
   }
 
   void _removeFoodFromMeal(int index) {
-    setState(() {
-      // Update total nutritional values by subtracting the removed food's values
-      totalCalories -= _selectedFoods[index].scaledCalories;
-      totalProteins -= _selectedFoods[index].scaledProteins;
-      totalFats -= _selectedFoods[index].scaledFats;
-      totalCarbohydrates -= _selectedFoods[index].scaledCarbohydrates;
-
-      _selectedFoods.removeAt(index);
-    });
+    context.read<MealDetailCubit>().removeFoodFromMeal(index);
   }
 
   void _saveMeal() {
     if (_mealNameController.text.isNotEmpty) {
       FocusScope.of(context).requestFocus(FocusNode());
+      var mealDetailState = context.read<MealDetailCubit>().state;
+
       final meal = Meal(
-          totalCalories, totalProteins, totalFats, totalCarbohydrates,
+          mealDetailState.totalCalories,
+          mealDetailState.totalProteins,
+          mealDetailState.totalFats,
+          mealDetailState.totalCarbohydrates,
           mealId: isEdit ? widget.mealId! : Guid.newGuid.toString(),
           name: _mealNameController.text,
-          selectedFoods: _selectedFoods);
+          selectedFoods: mealDetailState.selectedFoods);
       if (!isEdit) {
-        BlocProvider.of<MealBloc>(context).add(AddMeal(meal));
+        context.read<MealBloc>().add(AddMeal(meal));
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Meal added successfully'),
           backgroundColor: Colors.green,
@@ -390,7 +379,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
         ));
         Navigator.pop(context);
       } else {
-        BlocProvider.of<MealBloc>(context)
+        context.read<MealBloc>()
             .add(UpdateMeal(widget.mealId!, meal));
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Meal updated successfully'),
@@ -408,17 +397,5 @@ class _MealDetailPageState extends State<MealDetailPage> {
         showCloseIcon: true,
       ));
     }
-  }
-
-  void _calculateTotalValues(SelectedFood food) {
-    totalCalories = 0;
-    totalProteins = 0;
-    totalCarbohydrates = 0;
-    totalFats = 0;
-
-    totalCalories += food.scaledCalories;
-    totalProteins += food.scaledProteins;
-    totalFats += food.scaledFats;
-    totalCarbohydrates += food.scaledCarbohydrates;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:mealsmanagement/models/selected_food.dart';
 import 'package:mealsmanagement/repositories/meal_repository.dart';
 import 'package:meta/meta.dart';
 
@@ -70,7 +71,9 @@ class MealBloc extends Bloc<MealEvent, MealState> {
 
   void _onUpdateMeal(UpdateMeal event, Emitter<MealState> emit) async {
     try {
+      emit(MealLoading());
       await _mealRepository.updateMealWithFoods(event.mealId, event.meal);
+      emit(MealLoaded(event.meal));
     } catch (e) {
       emit(
           const MealsError(errorMessage: "Failed to update the selected meal"));
