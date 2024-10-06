@@ -212,6 +212,9 @@ class _MealDetailPageState extends State<MealDetailPage> {
   Widget buildRecapNutritionalValues() {
     return BlocBuilder<MealDetailCubit, MealDetailState>(
       builder: (context, state) {
+        if (state.selectedFoods.isEmpty) {
+          return Container();
+        }
         return Center(
           child: Card(
             color: const Color.fromRGBO(75, 85, 100, 1.0),
