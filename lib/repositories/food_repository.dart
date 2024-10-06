@@ -1,11 +1,8 @@
 import 'package:mealsmanagement/models/food.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../models/meal.dart';
 import '../models/meal_food.dart';
 import 'interfaces/IFoodRepository.dart';
-
-
 
 class FoodRepository implements IFoodRepository {
   final supabase = Supabase.instance.client;
@@ -31,25 +28,27 @@ class FoodRepository implements IFoodRepository {
 
   @override
   Future<void> deleteFood(String foodId) async {
-    final food = Food.fromMap((await supabase.from('Foods').select().eq('FoodId', foodId)).first);
-    final mealFoods = await supabase.from('MealFood').select().eq('FoodId', foodId);
+    final mealFoods =
+        await supabase.from('MealFood').select().eq('FoodId', foodId);
 
-    final mealIds = mealFoods.map((mf) =>
-    MealFood
-        .fromMap(mf)
-        .mealId).toList();
+    final mealIds = mealFoods.map((mf) => MealFood.fromMap(mf).mealId).toList();
     for (var mealId in mealIds) {
       final meal = Meal.FromMap(
           (await supabase.from('Meals').select().eq('MealId', mealId)).first);
+      final mealFood = mealFoods
+          .map((mf) => MealFood.fromMap(mf))
+          .firstWhere((mf) => mf.mealId == mealId && mf.foodId == foodId);
       final updatedMeal = Meal(
-          meal.totalCalories - food.calories,
-          meal.totalProteins - food.proteins,
-          meal.totalFats - food.fats,
-          meal.totalCarbohydrates - food.carbohydrates,
+          meal.totalCalories - mealFood.scaledCalories,
+          meal.totalProteins - mealFood.scaledProteins,
+          meal.totalFats - mealFood.scaledFats,
+          meal.totalCarbohydrates - mealFood.scaledCarbohydrates,
           mealId: meal.mealId,
-          name: meal.name
-      );
-      await supabase.from('Meals').update(updatedMeal.toMap()).eq('MealId', mealId);
+          name: meal.name);
+      await supabase
+          .from('Meals')
+          .update(updatedMeal.toMap())
+          .eq('MealId', mealId);
     }
     await supabase.from('Foods').delete().eq('FoodId', foodId);
     await supabase.from('MealFood').delete().eq('FoodId', foodId);
@@ -60,5 +59,4 @@ class FoodRepository implements IFoodRepository {
     final food = await supabase.from('Foods').select().eq('Name', foodName);
     return food.isNotEmpty;
   }
-
 }
