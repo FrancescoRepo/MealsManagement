@@ -44,76 +44,82 @@ class MainApp extends StatelessWidget {
           BlocProvider(
               create: (context) => FoodBloc(
                   RepositoryProvider.of<FoodRepository>(context),
-                  BlocProvider.of<NetworkCubit>(context))
-                ..loadFoods()),
+                  BlocProvider.of<NetworkCubit>(context))),
           BlocProvider(
               create: (context) => MealBloc(
                   RepositoryProvider.of<MealRepository>(context),
-                  BlocProvider.of<NetworkCubit>(context))
-                ..loadMeals()),
+                  BlocProvider.of<NetworkCubit>(context))),
           BlocProvider(create: (_) => MealDetailCubit()),
         ],
-        child: MaterialApp(
-          title: 'Meals Management',
-          theme: ThemeData(
-            primaryColor: const Color.fromRGBO(58, 66, 86, 1.0),
-            //useMaterial3: true,
-          ),
-          debugShowCheckedModeBanner: false,
-          home: DefaultTabController(
-              length: 2,
-              child: Builder(builder: (context) {
-                final TabController controller =
-                    DefaultTabController.of(context)!;
-                controller!.addListener(() {
-                  if (controller.index == 0) {
-                    BlocProvider.of<FoodBloc>(context).add(LoadFoods());
-                  } else {
-                    BlocProvider.of<MealBloc>(context).add(LoadMeals());
-                  }
-                });
-                return Scaffold(
-                  backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
-                  appBar: AppBar(
-                    centerTitle: true,
+        child: BlocListener<NetworkCubit, NetworkConnectionState>(
+          listener: (context, state) {
+            if (state.status == ConnectionStatus.connected) {
+              context.read<FoodBloc>().add(LoadFoods());
+              context.read<MealBloc>().add(LoadMeals());
+            }
+          },
+          child: MaterialApp(
+            title: 'Meals Management',
+            theme: ThemeData(
+              primaryColor: const Color.fromRGBO(58, 66, 86, 1.0),
+              //useMaterial3: true,
+            ),
+            debugShowCheckedModeBanner: false,
+            home: DefaultTabController(
+                length: 2,
+                child: Builder(builder: (context) {
+                  final TabController controller =
+                      DefaultTabController.of(context)!;
+                  controller!.addListener(() {
+                    if (controller.index == 0) {
+                      BlocProvider.of<FoodBloc>(context).add(LoadFoods());
+                    } else {
+                      BlocProvider.of<MealBloc>(context).add(LoadMeals());
+                    }
+                  });
+                  return Scaffold(
                     backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
-                    title: const Text(
-                      "Meals Management",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontStyle: FontStyle.italic,
-                          fontWeight: FontWeight.w700),
+                    appBar: AppBar(
+                      centerTitle: true,
+                      backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
+                      title: const Text(
+                        "Meals Management",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.w700),
+                      ),
                     ),
-                  ),
-                  bottomNavigationBar: const TabBar(
-                    automaticIndicatorColorAdjustment: true,
-                    indicatorColor: Colors.white,
-                    dividerColor: Color.fromRGBO(58, 66, 86, 1.0),
-                    tabs: [
-                      Tab(
-                        icon: Icon(
-                          Icons.fastfood,
+                    bottomNavigationBar: const TabBar(
+                      automaticIndicatorColorAdjustment: true,
+                      indicatorColor: Colors.white,
+                      dividerColor: Color.fromRGBO(58, 66, 86, 1.0),
+                      tabs: [
+                        Tab(
+                          icon: Icon(
+                            Icons.fastfood,
+                          ),
+                          text: 'Foods',
                         ),
-                        text: 'Foods',
-                      ),
-                      Tab(
-                        icon: Icon(CustomIcons.food),
-                        text: 'Meals',
-                      ),
-                    ],
-                    labelColor: Colors.white,
-                    unselectedLabelColor: Colors.white,
-                  ),
-                  body: TabBarView(children: [
-                    FoodsPage(
-                      key: key,
+                        Tab(
+                          icon: Icon(CustomIcons.food),
+                          text: 'Meals',
+                        ),
+                      ],
+                      labelColor: Colors.white,
+                      unselectedLabelColor: Colors.white,
                     ),
-                    MealsPage(
-                      key: key,
-                    )
-                  ]),
-                );
-              })),
+                    body: TabBarView(children: [
+                      FoodsPage(
+                        key: key,
+                      ),
+                      MealsPage(
+                        key: key,
+                      )
+                    ]),
+                  );
+                })),
+          ),
         ),
       ),
     );

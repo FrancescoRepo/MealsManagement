@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mealsmanagement/bloc/food/food_bloc.dart';
 import 'package:mealsmanagement/models/food.dart';
+import 'package:searchable_listview/searchable_listview.dart';
+import '../widgets/empty_list_view.dart';
 import '../widgets/foods_form_dialog.dart';
 import '../widgets/no_internet_connectivity.dart';
 
@@ -12,67 +14,23 @@ class FoodsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
-      body: BlocBuilder<FoodBloc, FoodState>(
-        builder: (BuildContext ctx, FoodState state) {
-          if (state is FoodsLoaded) {
-            return Column(children: [
-              Expanded(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: state.foods.length,
-                  itemBuilder: (context, index) {
-                    final food = state.foods[index];
-                    return Dismissible(
-                      key: Key(food.foodId),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        alignment: Alignment.center,
-                        color: Colors.redAccent,
-                        child: const Row(
-                          // Wrap with a row here
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.delete,
-                              color: Colors.white,
-                            ),
-                            Text(
-                              'Delete',
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      onDismissed: (direction) {
-                        BlocProvider.of<FoodBloc>(context)
-                            .add(DeleteFood(food.foodId));
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(const SnackBar(
-                          content: Text('Food removed'),
-                          backgroundColor: Colors.green,
-                          showCloseIcon: true,
-                          closeIconColor: Colors.white,
-                        ));
-                      },
-                      child: _cardItem(context, food),
-                    );
-                  },
+      body: SafeArea(
+        child: BlocBuilder<FoodBloc, FoodState>(
+          builder: (BuildContext ctx, FoodState state) {
+            if (state is FoodsLoaded) {
+              return buildFoodsList(context, state.foods);
+            } else if (state is FoodsError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.errorMessage),
                 ),
-              ),
-            ]);
-          } else if (state is FoodsError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.errorMessage),
-              ),
-            );
-          } else if (state is NoInternetConnectivity) {
-            return const NoInternetWidget();
-          }
-          return const Center(child: CircularProgressIndicator());
-        },
+              );
+            } else if (state is NoInternetConnectivity) {
+              return const NoInternetWidget();
+            }
+            return const Center(child: CircularProgressIndicator());
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.cyan,
@@ -89,6 +47,92 @@ class FoodsPage extends StatelessWidget {
           );
         },
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget buildFoodsList(BuildContext context, List<Food> foods) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: SearchableList<Food>(
+        style: const TextStyle(fontSize: 25, color: Colors.white),
+        itemBuilder: (food) {
+          return Dismissible(
+            key: Key(food.foodId),
+            direction: DismissDirection.endToStart,
+            background: Container(
+              alignment: Alignment.center,
+              color: Colors.redAccent,
+              child: const Row(
+                // Wrap with a row here
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.delete,
+                    color: Colors.white,
+                  ),
+                  Text(
+                    'Delete',
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            onDismissed: (direction) {
+              BlocProvider.of<FoodBloc>(context).add(DeleteFood(food.foodId));
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text('Food removed'),
+                backgroundColor: Colors.green,
+                showCloseIcon: true,
+                closeIconColor: Colors.white,
+              ));
+            },
+            child: _cardItem(context, food),
+          );
+        },
+        errorWidget: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error,
+                color: Colors.red,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Text('Error while fetching actors')
+            ],
+          ),
+        ),
+        initialList: foods,
+        filter: (p0) {
+          return foods
+              .where(
+                  (food) => food.name.toLowerCase().contains(p0.toLowerCase()))
+              .toList();
+        },
+        emptyWidget: const EmptyView(),
+        inputDecoration: InputDecoration(
+          labelText: "Search Food",
+          labelStyle: const TextStyle(color: Colors.white),
+          border: OutlineInputBorder(
+            borderSide: const BorderSide(
+              width: 1.0,
+            ),
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: const BorderSide(
+              color: Colors.cyan,
+              width: 1.0,
+            ),
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+        ),
+        closeKeyboardWhenScrolling: true,
       ),
     );
   }

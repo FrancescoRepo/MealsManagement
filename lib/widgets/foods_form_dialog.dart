@@ -164,7 +164,6 @@ class _FoodFormDialogState extends State<FoodFormDialog> {
             TextButton(
               child: const Text('Cancel'),
               onPressed: () {
-                BlocProvider.of<FoodBloc>(context).add(LoadFoods());
                 Navigator.of(context).pop();
               },
             ),

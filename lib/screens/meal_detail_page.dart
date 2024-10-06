@@ -259,48 +259,57 @@ class _MealDetailPageState extends State<MealDetailPage> {
       if (state is FoodsLoading) {
         return const CircularProgressIndicator();
       } else if (state is FoodsLoaded) {
-        return TypeAheadField<Food>(
-          builder: (context, controller, focusNode) {
-            return TextFormField(
-              controller: _foodSearchController,
-              focusNode: focusNode,
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
-                labelText: 'Search Food',
-                labelStyle: TextStyle(color: Colors.white70),
-                border: OutlineInputBorder(),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white70),
+        return FocusScope(
+          child: TypeAheadField<Food>(
+            controller: _foodSearchController,
+            hideOnUnfocus: false,
+            builder: (context, controller, focusNode) {
+              return TextFormField(
+                controller: controller,
+                focusNode: focusNode,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Search Food',
+                  labelStyle: TextStyle(color: Colors.white70),
+                  border: OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white70),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.cyanAccent),
+                  ),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.cyanAccent),
+                validator: (value) {
+                  if (_selectedFoodId == null) {
+                    return 'Please select a food';
+                  }
+                  return null;
+                },
+              );
+            },
+            suggestionsCallback: (pattern) {
+              return state.foods
+                  .where((food) =>
+                      food.name.toLowerCase().contains(pattern.toLowerCase()))
+                  .toList();
+            },
+            retainOnLoading: true,
+            itemBuilder: (context, Food suggestion) {
+              return ListTile(
+                title: Text(suggestion.name,
+                    style: const TextStyle(color: Colors.white)),
+                subtitle: Text(
+                  'Calories: ${suggestion.calories.truncate()}, Proteins: ${suggestion.proteins.truncate()}, Fats: ${suggestion.fats.truncate()}, Carbs: ${suggestion.carbohydrates.truncate()}',
+                  style: const TextStyle(color: Colors.white70),
                 ),
-              ),
-              validator: (value) {
-                if (_selectedFoodId == null) {
-                  return 'Please select a food';
-                }
-                return null;
-              },
-            );
-          },
-          suggestionsCallback: (pattern) {
-            return state.foods
-                .where((food) =>
-                    food.name.toLowerCase().contains(pattern.toLowerCase()))
-                .toList();
-          },
-          itemBuilder: (context, Food suggestion) {
-            return ListTile(
-              title: Text(suggestion.name,
-                  style: const TextStyle(color: Colors.white)),
-              tileColor: const Color.fromRGBO(75, 85, 100, 1.0),
-            );
-          },
-          onSelected: (Food suggestion) {
-            _selectedFoodId = suggestion.foodId;
-            _foodSearchController.text = suggestion.name;
-          },
+                tileColor: const Color.fromRGBO(75, 85, 100, 1.0),
+              );
+            },
+            onSelected: (Food suggestion) {
+              _selectedFoodId = suggestion.foodId;
+              _foodSearchController.text = suggestion.name;
+            },
+          ),
         );
       }
       return Container();
@@ -340,6 +349,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
           _foodSearchController.clear();
           _foodWeightController.clear();
           _selectedFoodId = null;
+          FocusScope.of(context).requestFocus(FocusNode());
         } else {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Food already added to the list!'),
@@ -379,8 +389,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
         ));
         Navigator.pop(context);
       } else {
-        context.read<MealBloc>()
-            .add(UpdateMeal(widget.mealId!, meal));
+        context.read<MealBloc>().add(UpdateMeal(widget.mealId!, meal));
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Meal updated successfully'),
           backgroundColor: Colors.green,

@@ -26,7 +26,7 @@ class NetworkCubit extends Cubit<NetworkConnectionState> {
 
   Future<void> checkInitialConnection() async {
     final connectivityResult = await _connectivity.checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
+    if (connectivityResult.first == ConnectivityResult.none) {
       emit(NetworkConnectionState(ConnectionStatus.disconnected));
     } else {
       emit(NetworkConnectionState(ConnectionStatus.connected));
