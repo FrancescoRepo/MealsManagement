@@ -39,4 +39,9 @@ class MealsError extends MealState {
   List<Object> get props => [];
 }
 
+class NoInternetConnectivity extends MealState {
+  @override
+  List<Object> get props => [];
+}
+
 

@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:mealsmanagement/bloc/network/network_cubit.dart';
 import 'package:mealsmanagement/models/selected_food.dart';
 import 'package:mealsmanagement/repositories/meal_repository.dart';
 import 'package:meta/meta.dart';
@@ -11,8 +12,9 @@ part 'meal_state.dart';
 
 class MealBloc extends Bloc<MealEvent, MealState> {
   final MealRepository _mealRepository;
+  final NetworkCubit _networkCubit;
 
-  MealBloc(this._mealRepository) : super(MealsLoading()) {
+  MealBloc(this._mealRepository, this._networkCubit) : super(MealsLoading()) {
     on<LoadMeals>(_onLoadMeals);
     on<LoadMeal>(_onLoadMeal);
     on<CreatingMeal>(_onCreatingMeal);
@@ -25,8 +27,13 @@ class MealBloc extends Bloc<MealEvent, MealState> {
   void _onLoadMeals(LoadMeals event, Emitter<MealState> emit) async {
     try {
       emit(MealsLoading());
-      var meals = await _mealRepository.getMeals();
-      emit(MealsLoaded(meals));
+      final isConnected = _networkCubit.state.status == ConnectionStatus.connected;
+      if(isConnected) {
+        var meals = await _mealRepository.getMeals();
+        emit(MealsLoaded(meals));
+      } else {
+        emit(NoInternetConnectivity());
+      }
     } catch (e) {
       emit(const MealsError(errorMessage: "Failed to load meals"));
     }

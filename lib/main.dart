@@ -1,9 +1,11 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mealsmanagement/bloc/food/food_bloc.dart';
 import 'package:mealsmanagement/bloc/meal/meal_bloc.dart';
 import 'package:mealsmanagement/bloc/meal/meal_detail_cubit.dart';
+import 'package:mealsmanagement/bloc/network/network_cubit.dart';
 import 'package:mealsmanagement/repositories/food_repository.dart';
 import 'package:mealsmanagement/repositories/meal_repository.dart';
 import 'package:mealsmanagement/CustomIcons.dart';
@@ -37,14 +39,19 @@ class MainApp extends StatelessWidget {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
-              create: (context) =>
-                  FoodBloc(RepositoryProvider.of<FoodRepository>(context))
-                    ..loadFoods()),
+              create: (_) =>
+                  NetworkCubit(Connectivity())..checkInitialConnection()),
           BlocProvider(
-              create: (context) =>
-                  MealBloc(RepositoryProvider.of<MealRepository>(context))
-                    ..loadMeals()),
-          BlocProvider(create: (_) => MealDetailCubit())
+              create: (context) => FoodBloc(
+                  RepositoryProvider.of<FoodRepository>(context),
+                  BlocProvider.of<NetworkCubit>(context))
+                ..loadFoods()),
+          BlocProvider(
+              create: (context) => MealBloc(
+                  RepositoryProvider.of<MealRepository>(context),
+                  BlocProvider.of<NetworkCubit>(context))
+                ..loadMeals()),
+          BlocProvider(create: (_) => MealDetailCubit()),
         ],
         child: MaterialApp(
           title: 'Meals Management',

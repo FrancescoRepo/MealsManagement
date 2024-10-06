@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mealsmanagement/CustomIcons.dart';
 import 'package:mealsmanagement/bloc/meal/meal_bloc.dart';
+import 'package:mealsmanagement/bloc/network/network_cubit.dart';
+import 'package:mealsmanagement/widgets/no_internet_connectivity.dart';
 
 import '../models/meal.dart';
 import 'meal_detail_page.dart';
@@ -11,6 +13,7 @@ class MealsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isConnected;
     return Scaffold(
       backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
       body: BlocBuilder<MealBloc, MealState>(
@@ -69,20 +72,27 @@ class MealsPage extends StatelessWidget {
                 content: Text(state.errorMessage),
               ),
             );
+          } else if (state is NoInternetConnectivity) {
+            return const NoInternetWidget();
           }
           return const Center(child: CircularProgressIndicator());
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.cyan,
-        foregroundColor: Colors.white,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const MealDetailPage()),
+      floatingActionButton: BlocBuilder<NetworkCubit, NetworkConnectionState>(
+        builder: (context, connectivity) {
+          bool isConnected = connectivity.status == ConnectionStatus.connected;
+          return FloatingActionButton(
+            backgroundColor: isConnected ? Colors.cyan : Colors.grey,
+            foregroundColor: Colors.white,
+            onPressed: isConnected
+                ? () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const MealDetailPage()))
+                : null,
+            child: const Icon(Icons.add),
           );
         },
-        child: const Icon(Icons.add),
       ),
     );
   }

@@ -29,3 +29,7 @@ class FoodsError extends FoodState {
   List<Object> get props => [];
 }
 
+class NoInternetConnectivity extends FoodState {
+  @override
+  List<Object> get props => [];
+}

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_guid/flutter_guid.dart';
 import 'package:mealsmanagement/bloc/food/food_bloc.dart';
+import 'package:mealsmanagement/bloc/network/network_cubit.dart';
 import '../models/food.dart';
 
 class FoodFormDialog extends StatefulWidget {
@@ -124,37 +125,37 @@ class _FoodFormDialogState extends State<FoodFormDialog> {
                         return null;
                       }),
                   TextFormField(
-                    controller: _carbohydratesController,
-                    decoration:
-                        const InputDecoration(labelText: 'Carbohydrates (g)'),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value!.isEmpty || num.tryParse(value) == null) {
-                        return 'Please enter the carbohydrates';
-                      }
-                      return null;
-                    }),
+                      controller: _carbohydratesController,
+                      decoration:
+                          const InputDecoration(labelText: 'Carbohydrates (g)'),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value!.isEmpty || num.tryParse(value) == null) {
+                          return 'Please enter the carbohydrates';
+                        }
+                        return null;
+                      }),
                   TextFormField(
-                    controller: _fatsController,
-                    decoration: const InputDecoration(labelText: 'Fats (g)'),
-                    keyboardType: TextInputType.number,
-                    validator: (value){
-                      if (value!.isEmpty || num.tryParse(value) == null) {
-                        return 'Please enter the fats';
-                      }
-                      return null;
-                    }),
+                      controller: _fatsController,
+                      decoration: const InputDecoration(labelText: 'Fats (g)'),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value!.isEmpty || num.tryParse(value) == null) {
+                          return 'Please enter the fats';
+                        }
+                        return null;
+                      }),
                   TextFormField(
-                    controller: _proteinsController,
-                    decoration:
-                        const InputDecoration(labelText: 'Proteins (g)'),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value!.isEmpty || num.tryParse(value) == null) {
-                        return 'Please enter the proteins';
-                      }
-                      return null;
-                    }),
+                      controller: _proteinsController,
+                      decoration:
+                          const InputDecoration(labelText: 'Proteins (g)'),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value!.isEmpty || num.tryParse(value) == null) {
+                          return 'Please enter the proteins';
+                        }
+                        return null;
+                      }),
                 ],
               ),
             ),
@@ -167,12 +168,21 @@ class _FoodFormDialogState extends State<FoodFormDialog> {
                 Navigator.of(context).pop();
               },
             ),
-            ElevatedButton(
-                onPressed: foodExists ? null : _submitForm,
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: foodExists ? Colors.grey : Colors.cyan,
-                    foregroundColor: Colors.white),
-                child: const Text('Save')),
+            BlocBuilder<NetworkCubit, NetworkConnectionState>(
+              builder: (context, connectivity) {
+                bool isConnected =
+                    connectivity.status == ConnectionStatus.connected;
+                return ElevatedButton(
+                  onPressed: foodExists || !isConnected ? null : _submitForm,
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: foodExists || !isConnected
+                          ? Colors.grey
+                          : Colors.cyan,
+                      foregroundColor: Colors.white),
+                  child: const Text('Save'),
+                );
+              },
+            ),
           ],
         );
       },

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mealsmanagement/bloc/food/food_bloc.dart';
 import 'package:mealsmanagement/models/food.dart';
 import '../widgets/foods_form_dialog.dart';
+import '../widgets/no_internet_connectivity.dart';
 
 class FoodsPage extends StatelessWidget {
   const FoodsPage({super.key});
@@ -67,6 +68,8 @@ class FoodsPage extends StatelessWidget {
                 content: Text(state.errorMessage),
               ),
             );
+          } else if (state is NoInternetConnectivity) {
+            return const NoInternetWidget();
           }
           return const Center(child: CircularProgressIndicator());
         },
