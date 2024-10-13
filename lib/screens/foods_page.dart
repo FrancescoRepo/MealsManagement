@@ -33,6 +33,7 @@ class FoodsPage extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: "addFoodBtn",
         backgroundColor: Colors.cyan,
         foregroundColor: Colors.white,
         onPressed: () {

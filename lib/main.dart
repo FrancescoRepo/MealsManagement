@@ -69,8 +69,8 @@ class MainApp extends StatelessWidget {
                 length: 2,
                 child: Builder(builder: (context) {
                   final TabController controller =
-                      DefaultTabController.of(context)!;
-                  controller!.addListener(() {
+                      DefaultTabController.of(context);
+                  controller.addListener(() {
                     if (controller.index == 0) {
                       BlocProvider.of<FoodBloc>(context).add(LoadFoods());
                     } else {

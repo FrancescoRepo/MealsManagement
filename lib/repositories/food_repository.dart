@@ -50,8 +50,8 @@ class FoodRepository implements IFoodRepository {
           .update(updatedMeal.toMap())
           .eq('MealId', mealId);
     }
-    await supabase.from('Foods').delete().eq('FoodId', foodId);
     await supabase.from('MealFood').delete().eq('FoodId', foodId);
+    await supabase.from('Foods').delete().eq('FoodId', foodId);
   }
 
   @override

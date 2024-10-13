@@ -82,6 +82,7 @@ class MealsPage extends StatelessWidget {
         builder: (context, connectivity) {
           bool isConnected = connectivity.status == ConnectionStatus.connected;
           return FloatingActionButton(
+            heroTag: "goToMealDetailBtn",
             backgroundColor: isConnected ? Colors.cyan : Colors.grey,
             foregroundColor: Colors.white,
             onPressed: isConnected

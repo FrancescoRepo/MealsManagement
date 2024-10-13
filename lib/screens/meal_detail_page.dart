@@ -49,6 +49,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
         title: const Text('Meal Details'),
         leading: BackButton(
           onPressed: () {
+            context.read<MealDetailCubit>().resetMeal();
             context.read<MealBloc>().add(LoadMeals());
             Navigator.pop(context);
           },
@@ -167,6 +168,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: "saveMealBtn",
         onPressed: mealExists ? null : _saveMeal,
         backgroundColor: mealExists ? Colors.grey : Colors.cyan,
         foregroundColor: Colors.white,
